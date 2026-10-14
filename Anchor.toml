@@ -1,0 +1,28 @@
+[toolchain]
+package_manager = "yarn"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+solhealth = "6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe"
+
+[programs.devnet]
+solhealth = "6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe"
+
+[provider]
+# To switch between networks:
+# Devnet: cluster = "devnet" (solana config set --url https://api.devnet.solana.com)
+# Localnet: cluster = "localnet" (solana config set --url http://127.0.0.1:8899)
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[hooks]
+
+[test]
+[test.validator]
+url = "http://127.0.0.1:8899"
