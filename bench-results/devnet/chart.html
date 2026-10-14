@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SolHealth Benchmark Report</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 32px 20px;
+      background: #fbf8ee;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1c1917;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header {
+      background: #ffffff;
+      border: 2px solid #000000;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.85);
+      margin-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 9999px;
+      border: 1.5px solid #000000;
+      background: #fef08a;
+      margin-right: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    th {
+      background: #f8fafc;
+      border-bottom: 2px solid #000000;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      color: #475569;
+    }
+    tr:nth-child(even) {
+      background: #f8fafc;
+    }
+    tr {
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .card {
+      background: #ffffff;
+      border: 2px solid #000000;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.85);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <span class="badge">Benchmark Report</span>
+          <span class="badge" style="background: #e0e7ff;">10 Iterations</span>
+          <h1 style="margin: 10px 0 4px 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em;">SolHealth Performance Benchmark</h1>
+          <p style="margin: 0; font-size: 13px; color: #64748b; font-family: monospace;">Network: https://api.devnet.solana.com | Date: 2026-10-13T23:52:23.191Z</p>
+        </div>
+      </div>
+    </div>
+
+    
+    <div style="background: #ffffff; border: 2px solid #000000; border-radius: 12px; padding: 20px; box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.85); margin-bottom: 24px;">
+      <h3 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.04em;">Solana Transaction Latency by Operation (ms)</h3>
+      <svg viewBox="0 0 680 250" style="width: 100%; height: auto; max-width: 680px; display: block; overflow: visible;">
+        
+      <rect x="70" y="10" width="12" height="12" rx="2" fill="#60a5fa" stroke="#000" stroke-width="1" />
+      <text x="86" y="20" font-size="11" font-weight="500" fill="#334155" font-family="system-ui, sans-serif">p50 ms</text>
+    
+      <rect x="158" y="10" width="12" height="12" rx="2" fill="#f59e0b" stroke="#000" stroke-width="1" />
+      <text x="174" y="20" font-size="11" font-weight="500" fill="#334155" font-family="system-ui, sans-serif">p95 ms</text>
+    
+      <rect x="246" y="10" width="12" height="12" rx="2" fill="#f87171" stroke="#000" stroke-width="1" />
+      <text x="262" y="20" font-size="11" font-weight="500" fill="#334155" font-family="system-ui, sans-serif">max ms</text>
+    
+        
+      <line x1="70" y1="210" x2="660" y2="210" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="214" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">0</text>
+    
+      <line x1="70" y1="165" x2="660" y2="165" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="169" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">577.3</text>
+    
+      <line x1="70" y1="120" x2="660" y2="120" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="124" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">1,154.5</text>
+    
+      <line x1="70" y1="75" x2="660" y2="75" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="79" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">1,731.8</text>
+    
+      <line x1="70" y1="30" x2="660" y2="30" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="34" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">2,309</text>
+    
+        
+        <rect x="89.75" y="134.1618812819404" width="32" height="75.83811871805959" fill="#60a5fa" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>register_record - p50 ms: 972.83 ms</title>
+      
+        <rect x="125.75" y="116.72432507579019" width="32" height="93.27567492420981" fill="#f59e0b" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>register_record - p95 ms: 1196.52 ms</title>
+      
+        <rect x="161.75" y="116.72432507579019" width="32" height="93.27567492420981" fill="#f87171" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>register_record - max ms: 1196.52 ms</title>
+      
+      <text x="143.75" y="228" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">register_record</text>
+    
+        <rect x="237.25" y="141.37524743178864" width="32" height="68.62475256821136" fill="#60a5fa" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>grant_access - p50 ms: 880.30 ms</title>
+      
+        <rect x="273.25" y="120.42162883499351" width="32" height="89.57837116500649" fill="#f59e0b" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>grant_access - p95 ms: 1149.09 ms</title>
+      
+        <rect x="309.25" y="120.42162883499351" width="32" height="89.57837116500649" fill="#f87171" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>grant_access - max ms: 1149.09 ms</title>
+      
+      <text x="291.25" y="228" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">grant_access</text>
+    
+        <rect x="384.75" y="140.26468617583373" width="32" height="69.73531382416628" fill="#60a5fa" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>access_record - p50 ms: 894.55 ms</title>
+      
+        <rect x="420.75" y="114.31144768297979" width="32" height="95.68855231702021" fill="#f59e0b" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>access_record - p95 ms: 1227.47 ms</title>
+      
+        <rect x="456.75" y="114.31144768297979" width="32" height="95.68855231702021" fill="#f87171" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>access_record - max ms: 1227.47 ms</title>
+      
+      <text x="438.75" y="228" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">access_record</text>
+    
+        <rect x="532.25" y="133.62334061498476" width="32" height="76.37665938501524" fill="#60a5fa" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>revoke_access - p50 ms: 979.74 ms</title>
+      
+        <rect x="568.25" y="53.50205781723693" width="32" height="156.49794218276307" fill="#f59e0b" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>revoke_access - p95 ms: 2007.52 ms</title>
+      
+        <rect x="604.25" y="53.50205781723693" width="32" height="156.49794218276307" fill="#f87171" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>revoke_access - max ms: 2007.52 ms</title>
+      
+      <text x="586.25" y="228" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">revoke_access</text>
+    
+      </svg>
+    </div>
+  
+    
+    <div style="background: #ffffff; border: 2px solid #000000; border-radius: 12px; padding: 20px; box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.85); margin-bottom: 24px;">
+      <h3 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.04em;">Mean Compute Units Consumed (CU)</h3>
+      <svg viewBox="0 0 680 220" style="width: 100%; height: auto; max-width: 680px; display: block; overflow: visible;">
+        
+      <rect x="70" y="10" width="12" height="12" rx="2" fill="#34d399" stroke="#000" stroke-width="1" />
+      <text x="86" y="20" font-size="11" font-weight="500" fill="#334155" font-family="system-ui, sans-serif">Mean CU</text>
+    
+        
+      <line x1="70" y1="180" x2="660" y2="180" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="184" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">0</text>
+    
+      <line x1="70" y1="142.5" x2="660" y2="142.5" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="146.5" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">4,436.8</text>
+    
+      <line x1="70" y1="105" x2="660" y2="105" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="109" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">8,873.5</text>
+    
+      <line x1="70" y1="67.5" x2="660" y2="67.5" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="71.5" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">13,310.3</text>
+    
+      <line x1="70" y1="30" x2="660" y2="30" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="34" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">17,747</text>
+    
+        
+        <rect x="125.75" y="95.98580041697188" width="32" height="84.01419958302812" fill="#34d399" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>register_record - Mean CU: 9940.00 CU</title>
+      
+      <text x="143.75" y="198" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">register_record</text>
+    
+        <rect x="273.25" y="49.56668732743563" width="32" height="130.43331267256437" fill="#34d399" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>grant_access - Mean CU: 15432.00 CU</title>
+      
+      <text x="291.25" y="198" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">grant_access</text>
+    
+        <rect x="420.75" y="109.34017016960613" width="32" height="70.65982983039387" fill="#34d399" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>access_record - Mean CU: 8360.00 CU</title>
+      
+      <text x="438.75" y="198" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">access_record</text>
+    
+        <rect x="568.25" y="118.75584605848876" width="32" height="61.24415394151124" fill="#34d399" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>revoke_access - Mean CU: 7246.00 CU</title>
+      
+      <text x="586.25" y="198" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">revoke_access</text>
+    
+      </svg>
+    </div>
+  
+    
+    <div style="background: #ffffff; border: 2px solid #000000; border-radius: 12px; padding: 20px; box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.85); margin-bottom: 24px;">
+      <h3 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.04em;">Client-Side Cryptography Latency (ms)</h3>
+      <svg viewBox="0 0 680 220" style="width: 100%; height: auto; max-width: 680px; display: block; overflow: visible;">
+        
+      <rect x="70" y="10" width="12" height="12" rx="2" fill="#fbbf24" stroke="#000" stroke-width="1" />
+      <text x="86" y="20" font-size="11" font-weight="500" fill="#334155" font-family="system-ui, sans-serif">AES-256-GCM Encrypt</text>
+    
+      <rect x="262" y="10" width="12" height="12" rx="2" fill="#a78bfa" stroke="#000" stroke-width="1" />
+      <text x="278" y="20" font-size="11" font-weight="500" fill="#334155" font-family="system-ui, sans-serif">SHA-256 Hash</text>
+    
+        
+      <line x1="70" y1="180" x2="660" y2="180" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="184" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">0</text>
+    
+      <line x1="70" y1="142.5" x2="660" y2="142.5" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="146.5" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">5</text>
+    
+      <line x1="70" y1="105" x2="660" y2="105" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="109" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">10</text>
+    
+      <line x1="70" y1="67.5" x2="660" y2="67.5" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="71.5" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">15</text>
+    
+      <line x1="70" y1="30" x2="660" y2="30" stroke="#e2e8f0" stroke-dasharray="3,3" />
+      <text x="62" y="34" font-size="10" fill="#64748b" text-anchor="end" font-family="monospace">20</text>
+    
+        
+        <rect x="132.33333333333331" y="173.7921374999496" width="32" height="6.207862500050396" fill="#fbbf24" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>100KB - AES-256-GCM Encrypt: 0.83 ms</title>
+      
+        <rect x="168.33333333333331" y="176.07548250001855" width="32" height="3.924517499981448" fill="#a78bfa" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>100KB - SHA-256 Hash: 0.52 ms</title>
+      
+      <text x="168.33333333333331" y="198" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">100KB</text>
+    
+        <rect x="328.99999999999994" y="153.37015499997506" width="32" height="26.629845000024943" fill="#fbbf24" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>1MB - AES-256-GCM Encrypt: 3.55 ms</title>
+      
+        <rect x="364.99999999999994" y="162.65143500000704" width="32" height="17.34856499999296" fill="#a78bfa" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>1MB - SHA-256 Hash: 2.31 ms</title>
+      
+      <text x="364.99999999999994" y="198" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">1MB</text>
+    
+        <rect x="525.6666666666666" y="54.66074249998201" width="32" height="125.339257500018" fill="#fbbf24" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>5MB - AES-256-GCM Encrypt: 16.71 ms</title>
+      
+        <rect x="561.6666666666666" y="92.3953275000531" width="32" height="87.6046724999469" fill="#a78bfa" rx="3" stroke="#000" stroke-width="1.2" />
+        <title>5MB - SHA-256 Hash: 11.68 ms</title>
+      
+      <text x="561.6666666666666" y="198" font-size="11" font-weight="600" fill="#334155" text-anchor="middle" font-family="system-ui, sans-serif">5MB</text>
+    
+      </svg>
+    </div>
+  
+
+    <div class="card">
+      <h3 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 700; color: #0f172a; text-transform: uppercase;">Table 1: Solana On-Chain Transactions</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Operation</th>
+            <th style="text-align: center;">Samples</th>
+            <th style="text-align: right;">p50 ms</th>
+            <th style="text-align: right;">p95 ms</th>
+            <th style="text-align: right;">max ms</th>
+            <th style="text-align: right;">Mean CU</th>
+            <th style="text-align: right;">Mean Fee SOL</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr>
+      <td style="padding: 10px 14px; font-weight: 600; font-family: monospace;">register_record</td>
+      <td style="padding: 10px 14px; text-align: center;">10</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">972.83 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">1196.52 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">1196.52 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">9,940</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">0.00000500 SOL</td>
+    </tr>
+
+    <tr>
+      <td style="padding: 10px 14px; font-weight: 600; font-family: monospace;">grant_access</td>
+      <td style="padding: 10px 14px; text-align: center;">10</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">880.30 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">1149.09 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">1149.09 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">15,432</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">0.00000500 SOL</td>
+    </tr>
+
+    <tr>
+      <td style="padding: 10px 14px; font-weight: 600; font-family: monospace;">access_record</td>
+      <td style="padding: 10px 14px; text-align: center;">10</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">894.55 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">1227.47 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">1227.47 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">8,360</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">0.00000500 SOL</td>
+    </tr>
+
+    <tr>
+      <td style="padding: 10px 14px; font-weight: 600; font-family: monospace;">revoke_access</td>
+      <td style="padding: 10px 14px; text-align: center;">10</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">979.74 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">2007.52 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">2007.52 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">7,246</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">0.00000500 SOL</td>
+    </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 700; color: #0f172a; text-transform: uppercase;">Table 2: Client-Side Cryptography (Browser-Safe WebCrypto)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Payload</th>
+            <th style="text-align: right;">AES-256-GCM Encrypt ms</th>
+            <th style="text-align: right;">SHA-256 ms</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr>
+      <td style="padding: 10px 14px; font-weight: 600;">100KB (100 KB)</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">0.83 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">0.52 ms</td>
+    </tr>
+
+    <tr>
+      <td style="padding: 10px 14px; font-weight: 600;">1MB (1,024 KB)</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">3.55 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">2.31 ms</td>
+    </tr>
+
+    <tr>
+      <td style="padding: 10px 14px; font-weight: 600;">5MB (5,120 KB)</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">16.71 ms</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">11.68 ms</td>
+    </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 700; color: #0f172a; text-transform: uppercase;">Table 3: Account Space & Rent-Exempt Deposits</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th style="text-align: center;">Size (InitSpace)</th>
+            <th style="text-align: right;">Rent Lamports</th>
+            <th style="text-align: right;">Rent-Exempt Deposit SOL</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr>
+      <td style="padding: 10px 14px; font-weight: 600;">Record</td>
+      <td style="padding: 10px 14px; text-align: center; font-family: monospace;">289 B</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">2,118,360 lamports</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">0.002118 SOL</td>
+    </tr>
+
+    <tr>
+      <td style="padding: 10px 14px; font-weight: 600;">Access</td>
+      <td style="padding: 10px 14px; text-align: center; font-family: monospace;">214 B</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">1,737,360 lamports</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">0.001737 SOL</td>
+    </tr>
+
+    <tr>
+      <td style="padding: 10px 14px; font-weight: 600;">Credential</td>
+      <td style="padding: 10px 14px; text-align: center; font-family: monospace;">82 B</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">1,066,800 lamports</td>
+      <td style="padding: 10px 14px; text-align: right; font-family: monospace;">0.001067 SOL</td>
+    </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

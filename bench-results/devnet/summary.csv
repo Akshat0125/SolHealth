@@ -1,0 +1,17 @@
+operation,samples,mean_ms,p50_ms,p95_ms,max_ms,mean_cu,mean_fee_lamports,mean_fee_sol,failures,retries
+register_record,10,979.03,972.83,1196.52,1196.52,9940,5000,0.00000500,0,0
+grant_access,10,947.21,880.30,1149.09,1149.09,15432,5000,0.00000500,0,0
+access_record,10,948.21,894.55,1227.47,1227.47,8360,5000,0.00000500,0,0
+revoke_access,10,1127.24,979.74,2007.52,2007.52,7246,5000,0.00000500,0,0
+
+# Rent-Exempt Deposits
+account,size_bytes,rent_lamports,rent_sol
+Record,289,2118360,0.002118
+Access,214,1737360,0.001737
+Credential,82,1066800,0.001067
+
+# Client-Side Crypto
+payload,encrypt_ms,sha256_ms
+100KB,0.83,0.52
+1MB,3.55,2.31
+5MB,16.71,11.68
