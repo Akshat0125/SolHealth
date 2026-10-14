@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+app/node_modules/
+.yarn/
+
+# Build outputs
+.next/
+app/.next/
+target/
+.anchor/
+**/*.rs.bk
+
+# Ledger & Logs
+test-ledger/
+*.log
+
+# Environment & Secrets (Never commit secrets)
+.env*
+.env.local
+app/.env*
+app/.env.local
+!.env.example
+!app/.env.example
+*keypair*.json
+*id.json
+scripts/.authority.json
+
+# OS files
+.DS_Store
+Thumbs.db
+.surfpool
