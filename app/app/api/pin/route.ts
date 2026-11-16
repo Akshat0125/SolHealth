@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
+
 // In-memory fallback cache for development/testing without Pinata API key
 declare global {
   // eslint-disable-next-line no-var
@@ -8,6 +10,35 @@ declare global {
 
 const ipfsStore = globalThis.__mockIpfsStore || new Map<string, Uint8Array>();
 globalThis.__mockIpfsStore = ipfsStore;
+
+// In-memory per-IP rate limit map
+// Note: In serverless environments (such as Vercel), instances are ephemeral and state is not shared
+// across isolated execution environments, making in-memory rate limiting approximate (best-effort).
+interface RateLimitRecord {
+  count: number;
+  resetAt: number;
+}
+const rateLimitMap = new Map<string, RateLimitRecord>();
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_UPLOADS_PER_WINDOW = 10;
+
+function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now > record.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true };
+  }
+
+  if (record.count >= MAX_UPLOADS_PER_WINDOW) {
+    const retryAfter = Math.max(1, Math.ceil((record.resetAt - now) / 1000));
+    return { allowed: false, retryAfter };
+  }
+
+  record.count += 1;
+  return { allowed: true };
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -32,13 +63,60 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  // 1. Kill switch check
+  if (process.env.UPLOADS_ENABLED === "false") {
+    return NextResponse.json(
+      { error: "File uploads are currently disabled by the administrator" },
+      { status: 503 }
+    );
+  }
+
+  // 2. Best-effort per-IP rate limit
+  const clientIp =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    request.headers.get("cf-connecting-ip") ||
+    "127.0.0.1";
+
+  const rateLimit = checkRateLimit(clientIp);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Upload rate limit exceeded. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfter),
+        },
+      }
+    );
+  }
+
+  // 3. Early Content-Length size check
+  const contentLength = request.headers.get("content-length");
+  if (contentLength && parseInt(contentLength, 10) > MAX_FILE_SIZE) {
+    return NextResponse.json(
+      { error: "Payload exceeds 4 MB maximum limit" },
+      { status: 413 }
+    );
+  }
+
+  // 4. Content-Type check (reject non-binary)
+  const contentType = request.headers.get("content-type") || "";
+  const isMultipart = contentType.includes("multipart/form-data");
+  const isOctet = contentType.includes("application/octet-stream");
+
+  if (!isMultipart && !isOctet) {
+    return NextResponse.json(
+      { error: "Only binary encrypted files (application/octet-stream or multipart/form-data) are accepted" },
+      { status: 415 }
+    );
+  }
+
   try {
     let fileBytes: Uint8Array;
     let fileName = "encrypted-record.bin";
 
-    const contentType = request.headers.get("content-type") || "";
-
-    if (contentType.includes("multipart/form-data")) {
+    if (isMultipart) {
       const formData = await request.formData();
       const file = formData.get("file");
       if (!file || !(file instanceof Blob)) {
@@ -55,11 +133,26 @@ export async function POST(request: Request) {
       const arrayBuffer = await request.arrayBuffer();
       if (!arrayBuffer || arrayBuffer.byteLength === 0) {
         return NextResponse.json(
-          { error: "No raw bytes received in request body" },
+          { error: "Upload payload cannot be empty" },
           { status: 400 }
         );
       }
       fileBytes = new Uint8Array(arrayBuffer);
+    }
+
+    // 5. Payload size and empty checks
+    if (fileBytes.length === 0) {
+      return NextResponse.json(
+        { error: "Upload payload cannot be empty" },
+        { status: 400 }
+      );
+    }
+
+    if (fileBytes.length > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: "Payload exceeds 4 MB maximum limit" },
+        { status: 413 }
+      );
     }
 
     const jwt = process.env.PINATA_JWT;
@@ -72,7 +165,7 @@ export async function POST(request: Request) {
         type: "application/octet-stream",
       });
 
-      // 1. Try Pinata v3 Files API: POST https://uploads.pinata.cloud/v3/files
+      // Try Pinata v3 Files API: POST https://uploads.pinata.cloud/v3/files
       try {
         const v3FormData = new FormData();
         v3FormData.append("file", blob, fileName);
@@ -90,12 +183,15 @@ export async function POST(request: Request) {
         if (v3Res.ok) {
           const v3Data = await v3Res.json();
           cid = v3Data?.data?.cid || v3Data?.cid || null;
+        } else {
+          // Log status without printing headers or tokens
+          console.warn(`Pinata v3 returned HTTP status ${v3Res.status}`);
         }
-      } catch (e) {
-        console.warn("Pinata v3 upload attempt failed:", e);
+      } catch {
+        console.warn("Pinata v3 upload request failed");
       }
 
-      // 2. Fallback to Pinata v1 pinFileToIPFS if v3 did not succeed
+      // Fallback to Pinata v1 pinFileToIPFS if v3 did not succeed
       if (!cid) {
         try {
           const v1FormData = new FormData();
@@ -116,16 +212,15 @@ export async function POST(request: Request) {
             const v1Data = await v1Res.json();
             cid = v1Data.IpfsHash;
           } else {
-            const errText = await v1Res.text();
-            console.warn(`Pinata v1 returned status ${v1Res.status}: ${errText}`);
+            console.warn(`Pinata v1 returned HTTP status ${v1Res.status}`);
           }
-        } catch (e) {
-          console.warn("Pinata v1 upload attempt failed:", e);
+        } catch {
+          console.warn("Pinata v1 upload request failed");
         }
       }
     }
 
-    // Fallback if Pinata is not configured or failed in development
+    // Fallback in-memory hash if Pinata is not configured or failed in development
     if (!cid) {
       const hashBuffer = await crypto.subtle.digest(
         "SHA-256",
@@ -133,7 +228,6 @@ export async function POST(request: Request) {
       );
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-      // Construct a valid CID-like string of max 64 chars (Anchor constraint)
       cid = `QmLocal${hex.slice(0, 40)}`;
     }
 
@@ -142,9 +236,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ cid });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
+    // Keep error details strictly server-side, return generic message to client
+    const errMessage = err instanceof Error ? err.message : "Unknown error";
+    console.error("Upload handler error:", errMessage);
     return NextResponse.json(
-      { error: `Internal server error: ${message}` },
+      { error: "Failed to process or pin encrypted file" },
       { status: 500 }
     );
   }

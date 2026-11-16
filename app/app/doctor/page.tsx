@@ -2,16 +2,17 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
-import { useRole } from "@/lib/roles";
+import { useSolhealth } from "@/lib/solhealth-context";
 import { 
   decryptFile, 
-  unwrapKey 
+  unwrapKeyX25519 
 } from "@/lib/crypto";
 import { 
   accessRecord, 
   getRecord, 
   getCredential, 
-  listAccessForDoctor 
+  listAccessForDoctor,
+  mapProgramError 
 } from "@/lib/solana";
 import { fetchFromIpfs } from "@/lib/ipfs";
 import { 
@@ -50,20 +51,26 @@ interface DecryptedRecordView {
 }
 
 export default function DoctorPage() {
-  const { keypairs, setRole, ready } = useRole();
-  const doctorKeypair = ready && keypairs ? keypairs.doctor : null;
-
-  const [credentialState, setCredentialState] = useState<{
-    exists: boolean;
-    active: boolean;
-    issuer?: string;
-  } | null>(null);
+  const {
+    mounted,
+    connected,
+    publicKey,
+    signer,
+    openWalletModal,
+    isDoctor,
+    doctorCredential,
+    encryptionStatus,
+    encryptionSecretRef,
+    activateEncryption,
+    programDeployed,
+  } = useSolhealth();
 
   const [sharedRecords, setSharedRecords] = useState<DoctorSharedRecord[]>([]);
-  // Compute countdowns in an effect with state initialised to null to prevent hydration mismatch
   const [nowTime, setNowTime] = useState<number | null>(null);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [activating, setActivating] = useState(false);
 
   // Decrypted record preview state
   const [decryptedView, setDecryptedView] = useState<DecryptedRecordView | null>(null);
@@ -82,23 +89,10 @@ export default function DoctorPage() {
   }, []);
 
   const loadData = useCallback(async () => {
-    if (!doctorKeypair) return;
+    if (!publicKey) return;
     setRefreshing(true);
     try {
-      // 1. Fetch Doctor's credential status
-      const cred = await getCredential(doctorKeypair.publicKey);
-      if (cred) {
-        setCredentialState({
-          exists: true,
-          active: cred.active,
-          issuer: cred.issuer.toBase58(),
-        });
-      } else {
-        setCredentialState({ exists: false, active: false });
-      }
-
-      // 2. Fetch all access grants for this doctor
-      const accessList = await listAccessForDoctor(doctorKeypair.publicKey);
+      const accessList = await listAccessForDoctor(publicKey);
       const recordsData: DoctorSharedRecord[] = [];
 
       for (const item of accessList) {
@@ -127,27 +121,57 @@ export default function DoctorPage() {
     } finally {
       setRefreshing(false);
     }
-  }, [doctorKeypair]);
+  }, [publicKey]);
 
   useEffect(() => {
-    setRole("doctor");
-    if (ready) {
+    if (mounted && publicKey) {
       loadData();
     }
-  }, [loadData, setRole, ready]);
+  }, [mounted, publicKey, loadData]);
 
-  // Handle "Open Record"
+  const copyDoctorAddress = async () => {
+    if (!publicKey) return;
+    try {
+      await navigator.clipboard.writeText(publicKey.toBase58());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
+  const handleActivate = async () => {
+    setActivating(true);
+    await activateEncryption();
+    setActivating(false);
+  };
+
+  // Handle Open Record
   const handleOpenRecord = async (record: DoctorSharedRecord) => {
-    if (!ready || !doctorKeypair) return;
+    if (!connected || !publicKey || !signer) return;
 
-    // Reset error for this record
     setOpenError((prev) => ({ ...prev, [record.accessPda]: null }));
 
-    // Front-end sanity checks with clear guidance
-    if (!credentialState?.active) {
+    if (programDeployed === false) {
       setOpenError((prev) => ({
         ...prev,
-        [record.accessPda]: "Access denied: You do not possess an active medical credential. Ask the medical authority to verify your wallet in Issuer portal.",
+        [record.accessPda]: "SolHealth program is not deployed on this network. Run npm run demo:reset in a terminal.",
+      }));
+      return;
+    }
+
+    if (!isDoctor) {
+      setOpenError((prev) => ({
+        ...prev,
+        [record.accessPda]: "Access denied: You do not possess an active medical credential. Ask the Publisher authority to verify your wallet.",
+      }));
+      return;
+    }
+
+    if (!encryptionSecretRef.current) {
+      setOpenError((prev) => ({
+        ...prev,
+        [record.accessPda]: "Please activate your encryption session before opening records.",
       }));
       return;
     }
@@ -171,17 +195,17 @@ export default function DoctorPage() {
 
     setLoadingAction(`open-${record.accessPda}`);
     const initialSteps: StepItem[] = [
-      { name: "1 Verifying access on-chain", status: "running", detail: "Signing access_record" },
-      { name: "2 Downloading ciphertext", status: "idle", detail: `CID: ${formatShortAddress(record.cid, 6)}` },
-      { name: "3 Unwrapping symmetric key", status: "idle", detail: "Doctor secret key" },
-      { name: "4 Decrypting record", status: "idle", detail: "AES-256-GCM" },
+      { name: "Verifying access on-chain", status: "running", detail: "Signing access_record" },
+      { name: "Downloading ciphertext", status: "idle", detail: `CID: ${formatShortAddress(record.cid, 6)}` },
+      { name: "Unwrapping symmetric key", status: "idle", detail: "X25519 memory secret" },
+      { name: "Decrypting record", status: "idle", detail: "AES-256-GCM" },
     ];
     setOpenSteps((prev) => ({ ...prev, [record.accessPda]: initialSteps }));
 
     try {
       // Step 1: Submit on-chain access_record call
       const recordPubkey = new PublicKey(record.recordPda);
-      const sig = await accessRecord(doctorKeypair, recordPubkey);
+      const sig = await accessRecord(signer, recordPubkey);
 
       setOpenSteps((prev) => ({
         ...prev,
@@ -207,8 +231,8 @@ export default function DoctorPage() {
         ) || [],
       }));
 
-      // Step 3: Unwrap symmetric key with Doctor's secret key
-      const rawKey = unwrapKey(record.doctorWrappedKey, doctorKeypair.secretKey);
+      // Step 3: Unwrap symmetric key with Doctor's in-memory X25519 secret key
+      const rawKey = unwrapKeyX25519(record.doctorWrappedKey, encryptionSecretRef.current);
       setOpenSteps((prev) => ({
         ...prev,
         [record.accessPda]: prev[record.accessPda]?.map((s, idx) =>
@@ -237,7 +261,6 @@ export default function DoctorPage() {
       let isPngOrJpg = false;
       let blobUrl: string | undefined = undefined;
 
-      // Check PNG magic bytes: 89 50 4E 47
       if (
         decryptedBytes.length > 4 &&
         decryptedBytes[0] === 0x89 &&
@@ -246,16 +269,7 @@ export default function DoctorPage() {
         decryptedBytes[3] === 0x47
       ) {
         isPngOrJpg = true;
-        const blob = new Blob([decryptedBytes.buffer as ArrayBuffer], { type: "image/png" });
-        blobUrl = URL.createObjectURL(blob);
-      } else if (
-        decryptedBytes.length > 3 &&
-        decryptedBytes[0] === 0xff &&
-        decryptedBytes[1] === 0xd8 &&
-        decryptedBytes[2] === 0xff
-      ) {
-        isPngOrJpg = true;
-        const blob = new Blob([decryptedBytes.buffer as ArrayBuffer], { type: "image/jpeg" });
+        const blob = new Blob([decryptedBytes as unknown as BlobPart], { type: "image/png" });
         blobUrl = URL.createObjectURL(blob);
       } else {
         try {
@@ -264,7 +278,7 @@ export default function DoctorPage() {
           isText = true;
         } catch {
           isText = false;
-          const blob = new Blob([decryptedBytes.buffer as ArrayBuffer], { type: "application/octet-stream" });
+          const blob = new Blob([decryptedBytes as unknown as BlobPart], { type: "application/octet-stream" });
           blobUrl = URL.createObjectURL(blob);
         }
       }
@@ -274,24 +288,33 @@ export default function DoctorPage() {
         recordPda: record.recordPda,
         cid: record.cid,
         fileHashHex: record.fileHashHex,
-        contentType: isPngOrJpg ? "image" : isText ? "text" : "binary",
+        contentType: isText ? "text" : isPngOrJpg ? "image" : "binary",
         textContent,
         blobUrl,
         rawBytes: decryptedBytes,
       });
 
-      // Scroll to viewer card
-      setTimeout(() => {
-        const viewerEl = document.getElementById("card-viewer");
-        if (viewerEl) viewerEl.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+      const viewerElem = document.getElementById("card-viewer");
+      if (viewerElem) {
+        viewerElem.scrollIntoView({ behavior: "smooth" });
+      }
     } catch (err: any) {
-      const msg = err.message || "Failed to decrypt and open medical record";
-      setOpenError((prev) => ({ ...prev, [record.accessPda]: msg }));
+      const rawMsg = err?.message || String(err);
+      const isRejection =
+        rawMsg.includes("User rejected") ||
+        rawMsg.includes("4001") ||
+        rawMsg.includes("cancelled");
+      const msg = isRejection ? "You cancelled the request in your wallet" : mapProgramError(err);
+
+      setOpenError((prev) => ({
+        ...prev,
+        [record.accessPda]: msg,
+      }));
+
       setOpenSteps((prev) => ({
         ...prev,
         [record.accessPda]: prev[record.accessPda]?.map((s) =>
-          s.status === "running" ? { ...s, status: "error", detail: msg } : s
+          s.status === "running" ? { ...s, status: "error", detail: "Failed" } : s
         ) || [],
       }));
     } finally {
@@ -299,134 +322,179 @@ export default function DoctorPage() {
     }
   };
 
-  // Helper to format countdown
-  const formatCountdown = (expirySec: number, revoked: boolean) => {
-    if (revoked) return { text: "Revoked", isRevoked: true, isExpired: false };
-    if (nowTime === null) return { text: "Calculating...", isRevoked: false, isExpired: false };
-    const diff = expirySec - nowTime;
-    if (diff <= 0) return { text: "Expired", isRevoked: false, isExpired: true };
+  const formatCountdown = (expirySeconds: number, revoked: boolean) => {
+    if (revoked) return { text: "Revoked", isExpired: true, isRevoked: true };
+    if (nowTime === null) return { text: "Calculating...", isExpired: false, isRevoked: false };
+    const diff = expirySeconds - nowTime;
+    if (diff <= 0) return { text: "Expired", isExpired: true, isRevoked: false };
 
-    const mins = Math.floor(diff / 60);
-    const secs = diff % 60;
-    return {
-      text: `${mins}m ${secs}s left`,
-      isRevoked: false,
-      isExpired: false,
-    };
+    const hours = Math.floor(diff / 3600);
+    const minutes = Math.floor((diff % 3600) / 60);
+    const seconds = diff % 60;
+
+    if (hours > 0) return { text: `${hours}h ${minutes}m remaining`, isExpired: false, isRevoked: false };
+    if (minutes > 0) return { text: `${minutes}m ${seconds}s remaining`, isExpired: false, isRevoked: false };
+    return { text: `${seconds}s remaining`, isExpired: false, isRevoked: false };
   };
-
-  // Compute checklist states
-  const isStatusDone = Boolean(ready && credentialState?.active);
-  const isOpenDone = Boolean(decryptedView !== null);
 
   const checklist: ChecklistStep[] = [
     {
       number: "1",
-      label: "Check your status",
-      status: isStatusDone ? "done" : "next",
-      targetCardId: "card-status",
+      label: "Medical license",
+      status: isDoctor ? "done" : "waiting",
+      targetCardId: "card-credential",
     },
     {
       number: "2",
-      label: "Open a record",
-      status: isOpenDone ? "done" : isStatusDone ? "next" : "waiting",
-      targetCardId: "card-shared",
+      label: "Shared records",
+      status: sharedRecords.length > 0 ? "done" : "next",
+      targetCardId: "card-records",
+    },
+    {
+      number: "3",
+      label: "Record viewer",
+      status: decryptedView ? "done" : "waiting",
+      targetCardId: "card-viewer",
     },
   ];
 
-  const nextStepText = !isStatusDone
-    ? "Ask the issuer to verify this wallet address to receive access permissions."
+  const nextStepText = !connected
+    ? "Connect your doctor wallet to inspect shared records."
+    : !isDoctor
+    ? "This wallet is not verified yet. Send this address to the Publisher."
+    : encryptionStatus !== "ready"
+    ? "Activate your encryption session to decrypt records."
     : sharedRecords.length === 0
-    ? "Ask a patient to share a medical record with your doctor address."
-    : !isOpenDone
-    ? "Open a shared medical record in step 2."
-    : "Review the decrypted medical record in the viewer below.";
+    ? "Waiting for a patient to grant access to your wallet."
+    : "Open and decrypt a shared health record.";
 
   return (
     <RolePage
       role="doctor"
       roleTitle="Doctor"
       breadcrumbLabel="Doctor"
-      titleQuestion="What have you been given access to?"
-      whatYouCanDo="Review your medical license status, browse patient records shared with you, and decrypt records within valid access windows."
+      titleQuestion="Which patient gave me permission to look?"
+      whatYouCanDo="View medical records shared with you, verify cryptographic integrity, and decrypt medical documents."
       checklist={checklist}
       nextStepText={nextStepText}
-      roleDescription="Verified clinician reading records shared by patients within granted expiry times."
+      roleDescription="Credentialed clinician with time-bounded, auditable record access."
     >
+      {/* Wallet Gating Card if Disconnected */}
+      {mounted && !connected && (
+        <div className="p-6 rounded-[24px] bg-[#fffdf6] border border-[#f9c933]/40 shadow-xs space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8a5a00]" />
+            <h3 className="font-headline font-bold text-base text-[#1b1f2a]">
+              Wallet Connection Required
+            </h3>
+          </div>
+          <p className="text-sm text-[#6b7280] leading-relaxed">
+            Doctor operations require signing access verification transactions. Please connect your Solana wallet.
+          </p>
+          <GlassButton variant="primary" onClick={openWalletModal}>
+            Connect wallet
+          </GlassButton>
+        </div>
+      )}
+
+      {/* Role Gating Card if Wallet Not Verified */}
+      {mounted && connected && !isDoctor && (
+        <div className="p-6 rounded-[24px] bg-[#fff8d6] border border-[#fde293] shadow-xs space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8a5a00]" />
+            <h3 className="font-headline font-bold text-base text-[#8a5a00]">
+              Wallet Verification Required
+            </h3>
+          </div>
+          <p className="text-sm text-[#1b1f2a] leading-relaxed">
+            This wallet is not verified yet. Send this address to the Publisher. Only doctors with active on-chain credentials issued by the medical authority can open patient records.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-mono text-xs bg-white px-3 py-1.5 rounded-[14px] border border-[rgba(27,31,42,0.1)] text-[#1b1f2a]">
+              {publicKey?.toBase58()}
+            </span>
+            <GlassButton variant="secondary" size="sm" onClick={copyDoctorAddress}>
+              {copied ? "COPIED" : "Copy Address"}
+            </GlassButton>
+          </div>
+        </div>
+      )}
+
+      {/* Encryption Activation Prompt */}
+      {mounted && connected && isDoctor && encryptionStatus !== "ready" && (
+        <div className="p-5 rounded-[22px] bg-[#fff9e6] border border-[#fde293] space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-headline font-bold text-sm text-[#8a5a00]">
+                Encryption Session Inactive
+              </div>
+              <div className="text-xs text-[#6b7280]">
+                Sign a message in your wallet to activate your in-memory decryption key.
+              </div>
+            </div>
+            <GlassButton
+              variant="primary"
+              size="sm"
+              onClick={handleActivate}
+              loading={activating}
+              loadingText="Activating..."
+            >
+              Activate encryption
+            </GlassButton>
+          </div>
+        </div>
+      )}
+
       {/* ======================================================== */}
-      {/* CARD 01: YOUR STATUS                                     */}
+      {/* CARD 01: CREDENTIAL STATUS                                */}
       {/* ======================================================== */}
       <StepCard
-        id="card-status"
+        id="card-credential"
         stepNumber="01"
-        title="Your status"
-        description="Verify that your clinician wallet holds an active credential issued by the medical authority."
+        title="Medical Credential Status"
+        description="Verify that your doctor Solana address is authorized by the medical authority."
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-[18px] bg-[#fffdf6] border border-[rgba(27,31,42,0.06)]">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="text-xs font-headline font-semibold text-[#6b7280]">
-              Medical License Status
+              Credential Status
             </div>
-            <div>
-              {ready && credentialState?.active ? (
-                <span className="status-pill status-pill-ok">
-                  Verified doctor
-                </span>
+            <div className="flex items-center gap-2">
+              {isDoctor ? (
+                <span className="status-pill status-pill-ok">Active license</span>
               ) : (
-                <span className="status-pill status-pill-danger">
-                  Not verified
-                </span>
+                <span className="status-pill status-pill-warn">Not verified</span>
               )}
             </div>
           </div>
 
-          {!credentialState?.active && (
-            <p className="text-xs text-[#b42318] font-medium max-w-xs">
-              Ask the medical licensing council to verify this wallet address in the Issuer portal.
-            </p>
-          )}
+          <div className="flex items-center gap-2">
+            <GlassButton
+              variant="secondary"
+              size="sm"
+              onClick={loadData}
+              disabled={refreshing}
+            >
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </GlassButton>
+          </div>
         </div>
-
-        <TechnicalDetails
-          title="Doctor credential details"
-          items={[
-            {
-              label: "Doctor Address",
-              value: ready && doctorKeypair ? doctorKeypair.publicKey.toBase58() : "----",
-              isAddress: true,
-            },
-            ...(credentialState?.issuer
-              ? [{ label: "Authority Address", value: credentialState.issuer, isAddress: true }]
-              : []),
-          ]}
-        />
       </StepCard>
 
       {/* ======================================================== */}
-      {/* CARD 02: SHARED WITH YOU                                 */}
+      {/* CARD 02: SHARED RECORDS                                  */}
       {/* ======================================================== */}
       <StepCard
-        id="card-shared"
+        id="card-records"
         stepNumber="02"
-        title="Shared with you"
-        description="Browse records patients have granted you time-bound access to, and open them while active."
+        title="Records Shared With You"
+        description="View records you have been granted permission to access, verify access on-chain, and decrypt."
       >
-        <div className="flex items-center justify-between pb-2">
-          <span className="text-xs font-headline font-semibold text-[#6b7280]">
-            {sharedRecords.length} shared records
-          </span>
-          <GlassButton
-            variant="secondary"
-            size="sm"
-            onClick={loadData}
-            loading={refreshing}
-            loadingText="Refreshing..."
-          >
-            Refresh
-          </GlassButton>
-        </div>
-
-        {sharedRecords.length === 0 ? (
+        {refreshing ? (
+          <div className="py-8 text-center text-xs font-mono text-[#6b7280]">
+            Checking shared records...
+          </div>
+        ) : sharedRecords.length === 0 ? (
           <EmptyStateBox
             message="No records shared with you yet. Ask a patient to grant access to your doctor address."
           />
@@ -434,14 +502,24 @@ export default function DoctorPage() {
           <div className="space-y-4">
             {sharedRecords.map((item) => {
               const countdown = formatCountdown(item.expirySeconds, item.revoked);
-              const isBlocked = countdown.isExpired || countdown.isRevoked || !credentialState?.active;
+              const isProgramMissing = programDeployed === false;
+              const isBlocked =
+                countdown.isExpired ||
+                countdown.isRevoked ||
+                !isDoctor ||
+                encryptionStatus !== "ready" ||
+                isProgramMissing;
               const isOpeningThis = loadingAction === `open-${item.accessPda}`;
               const thisSteps = openSteps[item.accessPda] || [];
               const thisError = openError[item.accessPda];
 
               let blockedReason = "";
-              if (!credentialState?.active) {
+              if (isProgramMissing) {
+                blockedReason = "Program not deployed.";
+              } else if (!isDoctor) {
                 blockedReason = "You do not have an active medical credential.";
+              } else if (encryptionStatus !== "ready") {
+                blockedReason = "Activate encryption above to decrypt.";
               } else if (countdown.isRevoked) {
                 blockedReason = "Access revoked by the patient.";
               } else if (countdown.isExpired) {
@@ -493,7 +571,7 @@ export default function DoctorPage() {
                         variant="primary"
                         size="sm"
                         onClick={() => handleOpenRecord(item)}
-                        disabled={!ready || isOpeningThis}
+                        disabled={!connected || isOpeningThis}
                         loading={isOpeningThis}
                         loadingText="Opening..."
                       >
@@ -502,12 +580,12 @@ export default function DoctorPage() {
                     )}
                   </div>
 
-                  {/* Inline Error or Denied Block */}
+                  {/* Inline Error Block */}
                   {thisError && (
                     <div className="rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] p-4 text-xs space-y-1">
                       <div className="flex items-center gap-1.5 font-headline font-bold text-[#b42318] uppercase tracking-wider">
                         <span className="w-2 h-2 rounded-full bg-[#b42318]" />
-                        Access Denied
+                        Access Notice
                       </div>
                       <p className="text-[#1b1f2a] font-medium leading-relaxed">
                         {thisError}
@@ -580,43 +658,31 @@ export default function DoctorPage() {
                 size="sm"
                 onClick={() => setDecryptedView(null)}
               >
-                Close preview
+                Close viewer
               </GlassButton>
             </div>
           </div>
 
-          {/* Viewer Area */}
-          <div className="p-4 rounded-[18px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] min-h-[140px]">
-            {decryptedView.contentType === "image" && decryptedView.blobUrl && (
-              <div className="text-center">
-                <img
-                  src={decryptedView.blobUrl}
-                  alt={`Record ${decryptedView.recordId}`}
-                  className="max-h-[460px] rounded-[14px] mx-auto object-contain border border-[rgba(27,31,42,0.08)]"
-                />
-              </div>
-            )}
-
-            {decryptedView.contentType === "text" && decryptedView.textContent && (
-              <pre className="font-mono text-xs sm:text-sm text-[#1b1f2a] whitespace-pre-wrap leading-relaxed overflow-x-auto p-2">
+          <div className="pt-3">
+            {decryptedView.contentType === "text" && decryptedView.textContent ? (
+              <pre className="p-4 rounded-[16px] bg-white border border-[rgba(27,31,42,0.08)] font-mono text-xs text-[#1b1f2a] overflow-x-auto whitespace-pre-wrap leading-relaxed">
                 {decryptedView.textContent}
               </pre>
-            )}
-
-            {decryptedView.contentType === "binary" && (
-              <div className="text-center py-6 font-body text-xs sm:text-sm text-[#6b7280]">
-                Binary document ({decryptedView.rawBytes.length} bytes). Click Download above to open.
+            ) : decryptedView.contentType === "image" && decryptedView.blobUrl ? (
+              <div className="p-4 rounded-[16px] bg-white border border-[rgba(27,31,42,0.08)] flex justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={decryptedView.blobUrl}
+                  alt={`Medical Record #${decryptedView.recordId}`}
+                  className="max-h-[500px] object-contain rounded-[8px]"
+                />
+              </div>
+            ) : (
+              <div className="p-4 rounded-[16px] bg-white border border-[rgba(27,31,42,0.08)] text-xs text-[#6b7280]">
+                Binary document format ({decryptedView.rawBytes.length} bytes). Use Download to save and open with external viewer.
               </div>
             )}
           </div>
-
-          <TechnicalDetails
-            title="Decrypted file details"
-            items={[
-              { label: "IPFS CID", value: decryptedView.cid },
-              { label: "Verified SHA-256 Hash", value: decryptedView.fileHashHex },
-            ]}
-          />
         </StepCard>
       )}
     </RolePage>

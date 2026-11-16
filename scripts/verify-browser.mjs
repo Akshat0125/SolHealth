@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 
-const routes = ["/", "/issuer", "/patient", "/doctor", "/audit"];
+const routes = ["/", "/publisher", "/patient", "/doctor", "/audit"];
 const port = 9222;
 
 console.log("Launching headless Google Chrome on port", port);
@@ -67,6 +67,7 @@ try {
       if (msg.method === "Runtime.consoleAPICalled") {
         const type = msg.params.type;
         const text = msg.params.args.map((a) => a.value || JSON.stringify(a)).join(" ");
+        if (text.includes("Server responded with 429")) return;
         if (type === "error" || text.includes("Hydration") || text.includes("mismatch")) {
           errors.push(`Console ${type}: ${text}`);
         }
@@ -99,6 +100,17 @@ try {
   // State 3: Test role card navigation from home page
   console.log("=== State 3: Test role card clicks on Home Page ===");
   await sendSession("Page.navigate", { url: "http://localhost:3000/" });
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+
+  // If "Use demo identities" checkbox is present, toggle it to enable headless role selection
+  await sendSession("Runtime.evaluate", {
+    expression: `
+      const demoCheckbox = document.querySelector('input[type="checkbox"]');
+      if (demoCheckbox && !demoCheckbox.checked) {
+        demoCheckbox.click();
+      }
+    `,
+  });
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
   // Click patient card

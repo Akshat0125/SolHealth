@@ -1,6 +1,7 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
+import nacl from "tweetnacl";
 import { Keypair, Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
 import {
@@ -10,6 +11,8 @@ import {
   grantAccess,
   revokeAccess,
   accessRecord,
+  registerEncryptionKey,
+  getEncryptionKey,
   getConfig,
   getCredential,
   getRecord,
@@ -21,8 +24,11 @@ import {
   encryptFile,
   decryptFile,
   sha256,
-  wrapKeyFor,
-  unwrapKey,
+  ENCRYPTION_MESSAGE,
+  deriveEncryptionKeypair,
+  deriveKeypairFromSecret,
+  wrapKeyForX25519,
+  unwrapKeyX25519,
 } from "../app/lib/crypto.ts";
 
 async function airdrop(connection: Connection, keypair: Keypair, sol = 5) {
@@ -52,7 +58,7 @@ function getAuthorityKeypair(): Keypair {
 }
 
 async function runFlowTest() {
-  console.log("=== SolHealth Flow Integration Test ===");
+  console.log("=== SolHealth Flow Integration Test (Signature-Derived X25519) ===");
   const connection = new Connection(LOCALNET_RPC_URL, "confirmed");
 
   // Step 1: Generate Keypairs and Airdrop
@@ -60,13 +66,17 @@ async function runFlowTest() {
   const authority = getAuthorityKeypair();
   const patient = Keypair.generate();
   const doctor = Keypair.generate();
+  const doctor2 = Keypair.generate();
+  const unverifiedDoctor = Keypair.generate();
 
   await airdrop(connection, authority, 10);
   await airdrop(connection, patient, 5);
   await airdrop(connection, doctor, 5);
-  console.log("✓ Airdrops confirmed for authority, patient, and doctor");
+  await airdrop(connection, doctor2, 5);
+  await airdrop(connection, unverifiedDoctor, 2);
+  console.log("✓ Airdrops confirmed for authority, patient, doctor, and test actors");
 
-  // Step 2: Initialize Config
+  // Step 2: Initialize Config as authority
   console.log("\n2. Checking and initializing Config as authority...");
   const existingConfig = await getConfig(connection);
   if (!existingConfig) {
@@ -81,10 +91,12 @@ async function runFlowTest() {
     throw new Error("Config account missing on-chain");
   }
 
-  // Step 3: Issue Credential to Doctor
-  console.log("\n3. Issuing credential to doctor...");
+  // Step 3: Issue Credential to Doctor (and Doctor2)
+  console.log("\n3. Issuing credentials to doctor and doctor2...");
   const issueCredTx = await issueCredential(authority, doctor.publicKey, connection);
-  console.log("✓ Credential issued, tx:", issueCredTx);
+  console.log("✓ Doctor 1 credential issued, tx:", issueCredTx);
+  await issueCredential(authority, doctor2.publicKey, connection);
+  console.log("✓ Doctor 2 credential issued");
 
   const cred = await getCredential(doctor.publicKey, connection);
   if (!cred || !cred.active || cred.doctor.toBase58() !== doctor.publicKey.toBase58()) {
@@ -92,21 +104,56 @@ async function runFlowTest() {
   }
   console.log("✓ Doctor credential verified on-chain (active: true)");
 
-  // Step 4: Encrypt sample health record
-  console.log("\n4. Encrypting sample health record with AES-256-GCM...");
+  // Step 4: Verify Deterministic Key Derivation & Register Encryption Keys
+  console.log("\n4. Deriving and registering X25519 encryption keys...");
+  const msgBytes = new TextEncoder().encode(ENCRYPTION_MESSAGE);
+
+  // Check determinism: same signature gives same keypair
+  const sig1 = nacl.sign.detached(msgBytes, patient.secretKey);
+  const sig2 = nacl.sign.detached(msgBytes, patient.secretKey);
+  const patientEnc1 = await deriveEncryptionKeypair(sig1);
+  const patientEnc2 = await deriveEncryptionKeypair(sig2);
+  for (let i = 0; i < 32; i++) {
+    if (patientEnc1.publicKey[i] !== patientEnc2.publicKey[i] || patientEnc1.secretKey[i] !== patientEnc2.secretKey[i]) {
+      throw new Error("Derivation non-deterministic: keys do not match!");
+    }
+  }
+  console.log("✓ Key derivation confirmed deterministic (same signature -> identical keypair)");
+
+  const patientEnc = await deriveKeypairFromSecret(patient.secretKey);
+  const doctorEnc = await deriveKeypairFromSecret(doctor.secretKey);
+  const doctor2Enc = await deriveKeypairFromSecret(doctor2.secretKey);
+
+  // Publish encryption keys on-chain
+  const patEncTx = await registerEncryptionKey(patient, patientEnc.publicKey, 1, connection);
+  console.log("✓ Patient encryption key registered on-chain, tx:", patEncTx);
+
+  const docEncTx = await registerEncryptionKey(doctor, doctorEnc.publicKey, 1, connection);
+  console.log("✓ Doctor 1 encryption key registered on-chain, tx:", docEncTx);
+
+  await registerEncryptionKey(doctor2, doctor2Enc.publicKey, 1, connection);
+  console.log("✓ Doctor 2 encryption key registered on-chain");
+
+  const fetchedDocKey = await getEncryptionKey(doctor.publicKey, connection);
+  if (!fetchedDocKey || Buffer.from(fetchedDocKey.x25519Pubkey).toString("hex") !== Buffer.from(doctorEnc.publicKey).toString("hex")) {
+    throw new Error("Published encryption key on-chain does not match derived key!");
+  }
+  console.log("✓ Verified published doctor encryption key on-chain matches derived key");
+
+  // Step 5: Encrypt sample health record
+  console.log("\n5. Encrypting sample health record with AES-256-GCM...");
   const originalReport =
     "PATIENT HEALTH SUMMARY:\nName: Alice Smith\nDOB: 1985-04-12\nBlood Type: A+\nAllergies: Penicillin\nVitals: Normal (BP 118/76, HR 72)";
   const reportBytes = new TextEncoder().encode(originalReport);
-
   const { cipher, rawKey } = await encryptFile(reportBytes);
   const fileHash = await sha256(cipher);
   console.log(`✓ Record encrypted: cipher ${cipher.length} bytes, fileHash (SHA-256) computed`);
 
-  // Step 5: Register Record on-chain
-  console.log("\n5. Registering record on-chain as patient...");
+  // Step 6: Register Record on-chain as patient (wrapped for patient's own X25519 key)
+  console.log("\n6. Registering record on-chain as patient...");
   const recordId = new BN(Date.now());
   const standInCid = "QmStandInCid" + Buffer.from(fileHash).toString("hex").slice(0, 32);
-  const patientWrappedKey = wrapKeyFor(patient.publicKey, rawKey);
+  const patientWrappedKey = wrapKeyForX25519(patientEnc.publicKey, rawKey);
 
   const regRecTx = await registerRecord(
     patient,
@@ -125,13 +172,26 @@ async function runFlowTest() {
   }
   console.log("✓ Record account verified on-chain at PDA:", recordPda.toBase58());
 
-  // Step 6: Wrap AES key for the Doctor
-  console.log("\n6. Wrapping symmetric AES key for doctor's Ed25519 key...");
-  const doctorWrappedKey = wrapKeyFor(doctor.publicKey, rawKey);
-  console.log(`✓ Wrapped key for doctor: ${doctorWrappedKey.length} bytes (<= 128 bytes limit)`);
+  // Step 7: Check that unverified doctor cannot be granted access
+  console.log("\n7. Verifying unverified doctor cannot receive access grant...");
+  let unverifiedGrantFailed = false;
+  try {
+    const dummyWrappedKey = wrapKeyForX25519(patientEnc.publicKey, rawKey);
+    await grantAccess(patient, recordPda, unverifiedDoctor.publicKey, new BN(300), dummyWrappedKey, connection);
+  } catch (err: any) {
+    unverifiedGrantFailed = true;
+    console.log("✓ Access correctly rejected for unverified doctor:", err.message);
+  }
+  if (!unverifiedGrantFailed) {
+    throw new Error("SECURITY FAILURE: Granting access to unverified doctor should have failed!");
+  }
 
-  // Step 7: Grant Access to Doctor
-  console.log("\n7. Granting access to doctor for 300 seconds...");
+  // Step 8: Wrap AES key for Doctor using doctor's published X25519 key & Grant Access
+  console.log("\n8. Wrapping symmetric AES key for doctor's published X25519 key...");
+  const doctorWrappedKey = wrapKeyForX25519(new Uint8Array(fetchedDocKey.x25519Pubkey), rawKey);
+  console.log(`✓ Wrapped key for doctor: ${doctorWrappedKey.length} bytes (104 bytes, <= 128 bytes limit)`);
+
+  console.log("Granting access to doctor for 300 seconds...");
   const durationSecs = new BN(300);
   const grantTx = await grantAccess(
     patient,
@@ -149,21 +209,45 @@ async function runFlowTest() {
   }
   console.log("✓ Access PDA verified on-chain, expiry:", new Date(accessAcc.expiry.toNumber() * 1000).toISOString());
 
-  // Step 8: Doctor accesses the record
-  console.log("\n8. Doctor calling accessRecord...");
+  // Step 9: Check that a different doctor cannot access someone else's grant
+  console.log("\n9. Verifying a different doctor (Doctor 2) cannot open Doctor 1's grant...");
+  let doc2AccessFailed = false;
+  try {
+    await accessRecord(doctor2, recordPda, connection);
+  } catch (err: any) {
+    doc2AccessFailed = true;
+    console.log("✓ Doctor 2 access correctly rejected:", err.message);
+  }
+  if (!doc2AccessFailed) {
+    throw new Error("SECURITY FAILURE: Doctor 2 was able to call accessRecord on Doctor 1's grant!");
+  }
+
+  // Step 10: Check that Doctor 2 cannot unwrap Doctor 1's wrapped key
+  console.log("\n10. Verifying Doctor 2 cannot unwrap key wrapped for Doctor 1...");
+  let doc2UnwrapFailed = false;
+  try {
+    unwrapKeyX25519(doctorWrappedKey, doctor2Enc.secretKey);
+  } catch {
+    doc2UnwrapFailed = true;
+  }
+  if (!doc2UnwrapFailed) {
+    throw new Error("SECURITY FAILURE: Doctor 2 was able to unwrap Doctor 1's key!");
+  }
+  console.log("✓ Isolation confirmed: Doctor 2 cannot unwrap Doctor 1's key");
+
+  // Step 11: Doctor 1 calls accessRecord and successfully decrypts
+  console.log("\n11. Doctor 1 calling accessRecord and decrypting...");
   const accessTx = await accessRecord(doctor, recordPda, connection);
   console.log("✓ RecordAccessed event emitted, tx:", accessTx);
 
-  // Step 9: Doctor unwraps key and decrypts file
-  console.log("\n9. Doctor unwrapping key and decrypting ciphertext...");
   const latestAccess = await getAccess(recordPda, doctor.publicKey, connection);
   if (!latestAccess) {
     throw new Error("Could not fetch access account for doctor");
   }
 
-  const unwrappedKey = unwrapKey(
+  const unwrappedKey = unwrapKeyX25519(
     new Uint8Array(latestAccess.wrappedKey),
-    doctor.secretKey
+    doctorEnc.secretKey
   );
   const decryptedReportBytes = await decryptFile(cipher, unwrappedKey);
   const decryptedReport = new TextDecoder().decode(decryptedReportBytes);
@@ -173,8 +257,8 @@ async function runFlowTest() {
   }
   console.log("✓ Decrypted report verified successfully:\n---\n" + decryptedReport + "\n---");
 
-  // Step 10: Revoke access and verify accessRecord fails
-  console.log("\n10. Patient revoking access from doctor...");
+  // Step 12: Revoke access and verify accessRecord fails
+  console.log("\n12. Patient revoking access from doctor...");
   const revokeTx = await revokeAccess(patient, recordPda, doctor.publicKey, connection);
   console.log("✓ Access revoked, tx:", revokeTx);
 
@@ -184,7 +268,7 @@ async function runFlowTest() {
   }
   console.log("✓ Verified on-chain: access.revoked == true");
 
-  console.log("\n11. Verifying doctor access fails after revocation...");
+  console.log("\n13. Verifying doctor access fails after revocation...");
   let accessFailedAfterRevoke = false;
   try {
     await accessRecord(doctor, recordPda, connection);

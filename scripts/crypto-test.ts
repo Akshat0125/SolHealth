@@ -3,13 +3,15 @@ import {
   encryptFile,
   decryptFile,
   sha256,
-  wrapKeyFor,
-  unwrapKey,
+  ENCRYPTION_MESSAGE,
+  deriveEncryptionKeypair,
+  wrapKeyForX25519,
+  unwrapKeyX25519,
 } from "../app/lib/crypto.ts";
 
 async function runCryptoTest() {
   try {
-    console.log("Starting crypto test...");
+    console.log("Starting SolHealth crypto test (v1 deterministic signature-derived X25519)...");
 
     // 1. Test SHA-256
     const sampleData = new TextEncoder().encode(
@@ -42,16 +44,37 @@ async function runCryptoTest() {
     }
     console.log("✓ File decryption succeeded and matches original plain text");
 
-    // 4. Test Key Wrapping (Ed25519 -> Curve25519 -> nacl.box)
-    const doctorKeypair = nacl.sign.keyPair(); // Ed25519 keypair
-    const wrapped = wrapKeyFor(doctorKeypair.publicKey, rawKey);
+    // 4. Test Deterministic Derivation of X25519 Keypair from signature of ENCRYPTION_MESSAGE
+    const doctorEd25519 = nacl.sign.keyPair();
+    const msgBytes = new TextEncoder().encode(ENCRYPTION_MESSAGE);
+    const sig1 = nacl.sign.detached(msgBytes, doctorEd25519.secretKey);
+    const sig2 = nacl.sign.detached(msgBytes, doctorEd25519.secretKey);
+
+    const docEnc1 = await deriveEncryptionKeypair(sig1);
+    const docEnc2 = await deriveEncryptionKeypair(sig2);
+
+    for (let i = 0; i < 32; i++) {
+      if (docEnc1.publicKey[i] !== docEnc2.publicKey[i]) {
+        throw new Error("Derivation is non-deterministic: public keys do not match!");
+      }
+      if (docEnc1.secretKey[i] !== docEnc2.secretKey[i]) {
+        throw new Error("Derivation is non-deterministic: secret keys do not match!");
+      }
+    }
+    console.log("✓ Deterministic key derivation verified (same signature -> identical X25519 keypair)");
+
+    // 5. Test Key Wrapping for recipient X25519 public key
+    const wrapped = wrapKeyForX25519(docEnc1.publicKey, rawKey);
+    if (wrapped.length !== 104) {
+      throw new Error(`Wrapped key layout mismatch: expected 104 bytes, got ${wrapped.length}`);
+    }
     if (wrapped.length > 128) {
       throw new Error(`Wrapped key exceeds 128 bytes: ${wrapped.length}`);
     }
-    console.log(`✓ Key wrapping succeeded (${wrapped.length} bytes <= 128 bytes)`);
+    console.log(`✓ Key wrapping succeeded (${wrapped.length} bytes: 32 pub + 24 nonce + 48 box)`);
 
-    // 5. Test Key Unwrapping
-    const unwrappedKey = unwrapKey(wrapped, doctorKeypair.secretKey);
+    // 6. Test Key Unwrapping with recipient X25519 secret key
+    const unwrappedKey = unwrapKeyX25519(wrapped, docEnc1.secretKey);
     if (unwrappedKey.length !== 32) {
       throw new Error(`Unwrapped key length mismatch: expected 32, got ${unwrappedKey.length}`);
     }
@@ -62,45 +85,58 @@ async function runCryptoTest() {
     }
     console.log("✓ Key unwrapping succeeded and matches original rawKey");
 
-    // 6. Decrypt file using unwrapped key
+    // 7. Decrypt file using unwrapped key
     const decryptedWithUnwrappedKey = await decryptFile(cipher, unwrappedKey);
     if (new TextDecoder().decode(decryptedWithUnwrappedKey) !== new TextDecoder().decode(sampleData)) {
       throw new Error("Decryption with unwrapped key failed to match original data");
     }
     console.log("✓ Decryption with unwrapped key succeeded");
 
-    // 7. Tamper verification: Flip one ciphertext byte and confirm decryption throws
+    // 8. Test isolation: Doctor cannot unwrap a key wrapped for another doctor
+    const otherDoctorEd25519 = nacl.sign.keyPair();
+    const otherSig = nacl.sign.detached(msgBytes, otherDoctorEd25519.secretKey);
+    const otherDocEnc = await deriveEncryptionKeypair(otherSig);
+
+    let otherUnwrapFailed = false;
+    try {
+      unwrapKeyX25519(wrapped, otherDocEnc.secretKey);
+    } catch {
+      otherUnwrapFailed = true;
+    }
+    if (!otherUnwrapFailed) {
+      throw new Error("SECURITY FAILURE: A different doctor unwrap did NOT throw!");
+    }
+    console.log("✓ Key isolation verified: a different doctor cannot unwrap another doctor's key");
+
+    // 9. Tamper verification: Flip one ciphertext byte and confirm decryption throws
     let decryptionFailedAsExpected = false;
     const tamperedCipher = new Uint8Array(cipher);
-    // Flip a bit in the encrypted body (after 12-byte IV)
     tamperedCipher[15] ^= 0x01;
     try {
       await decryptFile(tamperedCipher, rawKey);
     } catch {
       decryptionFailedAsExpected = true;
     }
-
     if (!decryptionFailedAsExpected) {
       throw new Error("Tampered ciphertext did NOT throw an error during decryption!");
     }
     console.log("✓ Tampered ciphertext correctly rejected by AES-GCM tag verification");
 
-    // 8. Tamper verification on wrapped key: Flip one byte in wrapped key and confirm unwrap throws
+    // 10. Tamper verification on wrapped key: Flip one byte in wrapped key and confirm unwrap throws
     let unwrapFailedAsExpected = false;
     const tamperedWrapped = new Uint8Array(wrapped);
     tamperedWrapped[60] ^= 0x01;
     try {
-      unwrapKey(tamperedWrapped, doctorKeypair.secretKey);
+      unwrapKeyX25519(tamperedWrapped, docEnc1.secretKey);
     } catch {
       unwrapFailedAsExpected = true;
     }
-
     if (!unwrapFailedAsExpected) {
       throw new Error("Tampered wrapped key did NOT throw an error during unwrapping!");
     }
     console.log("✓ Tampered wrapped key correctly rejected by nacl.box.open");
 
-    console.log("\nPASS");
+    console.log("\nPASS: ALL CRYPTO CHECKS PASSED!");
   } catch (err) {
     console.error("\nFAIL:", err);
     process.exit(1);

@@ -372,6 +372,7 @@ export function StepCard({
 export interface InlineResultProps {
   status?: "idle" | "running" | "done" | "error";
   errorMessage?: string | null;
+  rawError?: string | null;
   successMessage?: string | null;
   txSignature?: string | null;
   steps?: StepItem[];
@@ -380,6 +381,7 @@ export interface InlineResultProps {
 export function InlineResultArea({
   status,
   errorMessage,
+  rawError,
   successMessage,
   txSignature,
   steps = [],
@@ -408,6 +410,9 @@ export function InlineResultArea({
               pillText = "Failed";
             }
 
+            // Strip any accidental leading digits/spaces from step.name so numbering is never doubled
+            const cleanName = step.name.replace(/^\d+\s*/, "");
+
             return (
               <div
                 key={idx}
@@ -417,8 +422,8 @@ export function InlineResultArea({
                   <span className="font-mono text-[#8a5a00] mr-2">
                     {String(idx + 1).padStart(2, "0")}
                   </span>
-                  {step.name}
-                  {step.detail && (
+                  {cleanName}
+                  {step.detail && step.status !== "error" && (
                     <span className="text-[#6b7280] font-mono ml-2">
                       ({step.detail})
                     </span>
@@ -433,12 +438,18 @@ export function InlineResultArea({
 
       {/* Error Message: soft red rounded block */}
       {errorMessage && (
-        <div className="rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] p-4 text-xs space-y-1">
+        <div className="rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] p-4 text-xs space-y-2">
           <div className="flex items-center gap-1.5 font-headline font-bold text-[#b42318] uppercase tracking-wider">
             <span className="w-2 h-2 rounded-full bg-[#b42318]" />
             Action Failed
           </div>
           <div className="text-[#1b1f2a] font-medium">{errorMessage}</div>
+          {rawError && rawError !== errorMessage && (
+            <TechnicalDetails
+              title="Technical details"
+              items={[{ label: "Raw error", value: rawError }]}
+            />
+          )}
         </div>
       )}
 

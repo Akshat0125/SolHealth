@@ -19,6 +19,7 @@ import {
   grantAccess,
   revokeAccess,
   accessRecord,
+  registerEncryptionKey,
   getConfig,
   getCredential,
   getRecordPda,
@@ -27,7 +28,8 @@ import {
 import {
   encryptFile,
   sha256,
-  wrapKeyFor,
+  deriveKeypairFromSecret,
+  wrapKeyForX25519,
 } from "../app/lib/crypto.ts";
 
 // Helper: Sleep
@@ -668,8 +670,15 @@ async function runBenchmark(): Promise<void> {
   );
   const { cipher, rawKey } = await encryptFile(sampleData);
   const fileHash = await sha256(cipher);
-  const patientWrappedKey = wrapKeyFor(patient.publicKey, rawKey);
-  const doctorWrappedKey = wrapKeyFor(doctor.publicKey, rawKey);
+
+  // Derive X25519 encryption keys & publish on-chain
+  const patientEnc = await deriveKeypairFromSecret(patient.secretKey);
+  const doctorEnc = await deriveKeypairFromSecret(doctor.secretKey);
+  await registerEncryptionKey(patient, patientEnc.publicKey, 1, connection);
+  await registerEncryptionKey(doctor, doctorEnc.publicKey, 1, connection);
+
+  const patientWrappedKey = wrapKeyForX25519(patientEnc.publicKey, rawKey);
+  const doctorWrappedKey = wrapKeyForX25519(doctorEnc.publicKey, rawKey);
 
   // Step 3: Run transactions benchmark loop
   console.log(`\n2. Running ${BENCH_ITERATIONS} iterations of on-chain operations...`);

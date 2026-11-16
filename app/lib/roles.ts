@@ -13,8 +13,15 @@ import {
   Connection,
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
+import { checkProgramDeployed } from "./health.ts";
 
 export type Role = "issuer" | "patient" | "doctor";
+
+export const ROLE_LABELS: Record<Role, string> = {
+  issuer: "Publisher",
+  patient: "Patient",
+  doctor: "Doctor",
+};
 
 export interface KeypairMap {
   issuer: Keypair;
@@ -34,6 +41,8 @@ export interface RoleContextType {
   refreshBalances: () => Promise<void>;
   loading: boolean;
   rpcOnline: boolean | null;
+  programDeployed: boolean | null;
+  refreshProgramDeployed: () => Promise<boolean>;
 }
 
 export const CLUSTER = process.env.NEXT_PUBLIC_CLUSTER || "local";
@@ -98,6 +107,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
   });
   const [loading, setLoading] = useState(false);
   const [rpcOnline, setRpcOnline] = useState<boolean | null>(null);
+  const [programDeployed, setProgramDeployed] = useState<boolean | null>(null);
 
   // Check RPC reachability
   const checkRpc = useCallback(async () => {
@@ -108,6 +118,20 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
       return true;
     } catch {
       setRpcOnline(false);
+      setProgramDeployed(false);
+      return false;
+    }
+  }, []);
+
+  // Check whether SolHealth program is deployed
+  const refreshProgramDeployed = useCallback(async () => {
+    try {
+      const conn = getSolanaConnection();
+      const isDeployed = await checkProgramDeployed(conn);
+      setProgramDeployed(isDeployed);
+      return isDeployed;
+    } catch {
+      setProgramDeployed(false);
       return false;
     }
   }, []);
@@ -120,6 +144,34 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
     }, 10000);
     return () => clearInterval(interval);
   }, [checkRpc]);
+
+  // Periodic Program Deployment check: runs in effect after ready and every 15s while page is visible
+  useEffect(() => {
+    if (!ready) return;
+
+    const check = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        void refreshProgramDeployed();
+      }
+    };
+
+    check();
+
+    const interval = setInterval(check, 15000);
+
+    const handleVisibilityChange = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        check();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [ready, refreshProgramDeployed]);
 
   // Load keypairs and restore selected role ONLY inside useEffect (never in render or useState)
   useEffect(() => {
@@ -247,6 +299,8 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
     refreshBalances,
     loading,
     rpcOnline,
+    programDeployed,
+    refreshProgramDeployed,
   };
 
   return React.createElement(RoleContext.Provider, { value }, children);

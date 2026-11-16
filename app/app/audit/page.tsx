@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useRole } from "@/lib/roles";
+import { useSolhealth } from "@/lib/solhealth-context";
 import { 
   fetchAuditLogs, 
   formatAuditEntry, 
@@ -20,7 +20,7 @@ import { makeExplorerUrl } from "@/components/StepStatus";
 type AuditFilterCategory = "all" | "credentials" | "records" | "access";
 
 export default function AuditPage() {
-  const { ready, keypairs } = useRole();
+  const { mounted, demoKeypairs, publicKey } = useSolhealth();
   const [rawEntries, setRawEntries] = useState<any[]>([]);
   const [activeFilter, setActiveFilter] = useState<AuditFilterCategory>("all");
   const [loading, setLoading] = useState(true);
@@ -28,13 +28,14 @@ export default function AuditPage() {
   const [error, setError] = useState<string | null>(null);
 
   const knownAddresses = useMemo(() => {
-    if (!ready || !keypairs) return {};
-    return {
-      issuer: keypairs.issuer.publicKey.toBase58(),
-      patient: keypairs.patient.publicKey.toBase58(),
-      doctor: keypairs.doctor.publicKey.toBase58(),
-    };
-  }, [ready, keypairs]);
+    const map: { issuer?: string; patient?: string; doctor?: string } = {};
+    if (demoKeypairs) {
+      map.issuer = demoKeypairs.issuer.publicKey.toBase58();
+      map.patient = demoKeypairs.patient.publicKey.toBase58();
+      map.doctor = demoKeypairs.doctor.publicKey.toBase58();
+    }
+    return map;
+  }, [demoKeypairs]);
 
   const loadAuditData = useCallback(async () => {
     setRefreshing(true);

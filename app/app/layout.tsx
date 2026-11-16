@@ -2,8 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from "next/font/google";
 import "@/lib/polyfills";
 import "./globals.css";
-import { RoleProvider } from "@/lib/roles";
+import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
+import { WalletModal } from "@/components/WalletModal";
+import { CLUSTER } from "@/lib/config";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -50,17 +52,18 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col bg-[#fffdf6] text-[#1b1f2a]"
       >
-        <RoleProvider>
+        <Providers>
           <Navbar />
           <main className="flex-1 w-full flex flex-col">
             {children}
           </main>
+          <WalletModal />
           <footer className="border-t border-[rgba(27,31,42,0.06)] bg-[#ffffff]/60 backdrop-blur-md py-6 px-4 mt-auto">
             <div className="max-w-[1200px] mx-auto text-center font-mono text-xs text-[#6b7280]">
-              Solana local validator / encrypted in browser / IPFS via Pinata
+              Running on Solana {CLUSTER === "devnet" ? "Devnet" : "Localnet"}. Test network, no real money.
             </div>
           </footer>
-        </RoleProvider>
+        </Providers>
       </body>
     </html>
   );

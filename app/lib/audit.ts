@@ -133,7 +133,7 @@ export function resolveAddress(
   addr: string,
   known: { issuer?: string; patient?: string; doctor?: string } = {}
 ): { label: string; isKnown: boolean } {
-  if (known?.issuer && addr === known.issuer) return { label: "Issuer", isKnown: true };
+  if (known?.issuer && addr === known.issuer) return { label: "Publisher", isKnown: true };
   if (known?.patient && addr === known.patient) return { label: "Patient", isKnown: true };
   if (known?.doctor && addr === known.doctor) return { label: "Doctor", isKnown: true };
   return { label: formatShortAddress(addr, 6), isKnown: false };
@@ -158,16 +158,16 @@ export function formatAuditEntry(
       category = "credentials";
       status = "ok";
       sentence = doctorResolved?.isKnown
-        ? "Issuer verified a doctor"
-        : `Issuer verified doctor ${doctorResolved?.label || ""}`.trim();
+        ? "Publisher verified a doctor"
+        : `Publisher verified doctor ${doctorResolved?.label || ""}`.trim();
       break;
     }
     case "CredentialRevoked": {
       category = "credentials";
       status = "danger";
       sentence = doctorResolved?.isKnown
-        ? "Issuer removed a doctor's verification"
-        : `Issuer removed verification for doctor ${doctorResolved?.label || ""}`.trim();
+        ? "Publisher removed a doctor's verification"
+        : `Publisher removed verification for doctor ${doctorResolved?.label || ""}`.trim();
       break;
     }
     case "RecordRegistered": {
@@ -196,6 +196,12 @@ export function formatAuditEntry(
       category = "access";
       status = "ok";
       sentence = "Doctor opened a record";
+      break;
+    }
+    case "EncryptionKeyRegistered": {
+      category = "credentials";
+      status = "ok";
+      sentence = "User registered their encryption key";
       break;
     }
     default: {
