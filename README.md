@@ -29,32 +29,32 @@ The browser encrypts the raw medical payload using AES-256-GCM with a freshly ge
 ## What is Implemented
 
 The following features are fully implemented and verified in the codebase:
-- Issuer-backed doctor credentials stored on-chain as Program Derived Addresses (PDAs).
-- Client-side browser-safe encryption (AES-256-GCM) and public key wrapping (X25519 / TweetNaCl).
-- Server-side IPFS pinning relay via Pinata accepting only encrypted ciphertext payloads.
-- On-chain medical record registration storing CID, SHA-256 content hash, and wrapped key.
-- Time-bounded access delegation with on-chain timestamp expiry and instant revocation.
-- Smart contract permission enforcement preventing revoked, expired, or non-credentialed access.
-- Cryptographic tamper detection comparing downloaded ciphertext checksums against on-chain hashes.
-- Comprehensive audit log timeline with CSV export and Solana Explorer transaction links.
-- Automated benchmark suites for local validator and live Solana Devnet environments.
+- **Solana Wallet Standard Integration**: Connect real browser extension wallets (Phantom, Solflare, Backpack) with auto-discovery and custom glass modal.
+- **Deterministic Encryption Key Derivation**: Private X25519 keys derived in memory from off-chain wallet signature of canonical `ENCRYPTION_MESSAGE`, with on-chain public key registration (`register_encryption_key`) and mismatch detection.
+- **Client-Side Encryption & Key Encapsulation**: AES-256-GCM browser file encryption with 104-byte X25519 key encapsulation (TweetNaCl Box), well within the 128-byte contract limit.
+- **Hardened IPFS Relay**: Server-side Pinata pinning relay with 4 MB payload enforcement, non-binary rejection, in-memory rate limiting, and administrative kill-switch (`UPLOADS_ENABLED`).
+- **Publisher-Backed Doctor Credentials**: Program Derived Addresses (PDAs) managed by the designated root Publisher authority.
+- **On-Chain Record Registration**: Stores IPFS CID, SHA-256 integrity hash, and patient wrapped key in `Record` PDAs.
+- **Time-Bounded Access Delegation**: `grant_access` instructions enforce duration, expiry timestamps, doctor-specific wrapped keys, and instant revocation.
+- **Smart Contract Access Control**: Rejects revoked, expired, or non-credentialed access attempts with descriptive Anchor error codes.
+- **Cryptographic Tamper Detection**: Compares downloaded ciphertext checksums against on-chain hashes and verifies that single-bit tampering triggers AES-GCM authentication failure.
+- **Live Audit Timeline**: Real-time decoded Anchor event logs (`CredentialIssued`, `EncryptionKeyRegistered`, `RecordRegistered`, `AccessGranted`, `RecordAccessed`, `AccessRevoked`) with CSV export and Explorer links.
 
 ## Trust Model and Limitations
 
 This implementation maintains the following operational assumptions and technical boundaries:
-- Demo Role Storage: Demo keypairs are stored unencrypted in browser localStorage for testing purposes, rather than in hardware wallets or external browser extension apps.
-- Trusted Authority: The root configuration relies on a designated authority public key to issue doctor credentials.
-- External Storage Dependency: Document persistence depends on Pinata IPFS availability and gateway reachability.
-- Decrypted Data Boundaries: On-chain revocation prevents future decryption key retrieval and access execution; however, revoking access cannot retroactively erase data that a doctor already decrypted and saved locally.
-- Public Metadata: While document payloads are encrypted, Solana transaction history exposes public wallet addresses, account PDAs, and interaction timestamps.
-- Credential Representation: Doctor credentials are implemented as lightweight Anchor account PDAs, not Metaplex Soulbound Tokens (SBTs).
-- Performance Benchmarks: Latencies and fees recorded on local validator and Devnet reflect isolated slot times and public RPC conditions; neither represents Solana Mainnet production performance.
+- **Private Key Isolation**: Derived X25519 secret keys live exclusively in memory (React refs) and are cleared on disconnect, account change, and page unload. Secret keys and signatures are never written to localStorage, cookies, or server logs.
+- **Wallet Message Signing**: The connected wallet must support message signing (`signMessage`) to derive encryption keys.
+- **Canonical Message Immutability**: The `ENCRYPTION_MESSAGE` text must remain constant; altering the message changes the derived encryption keys.
+- **Decrypted Data Boundaries**: On-chain revocation prevents future decryption key retrieval and access execution; however, revoking access cannot retroactively erase data that a doctor already decrypted and saved locally.
+- **Public Metadata**: While document payloads and AES keys are encrypted, Solana transaction history exposes public wallet addresses, account PDAs, and interaction timestamps.
+- **External Storage Dependency**: Document persistence depends on Pinata IPFS availability and gateway reachability.
+- **Performance Benchmarks**: Latencies and fees recorded on local validator and Devnet reflect isolated slot times and public RPC conditions; neither represents Solana Mainnet production performance.
 
 ## Future Work
 
 The following items are design goals for future iterations and are not claimed as implemented:
 - Zero-knowledge emergency access verification (Circom / SnarkJS circuits with hospital multi-sig triggers and replay protection).
-- Native wallet-app integration (Phantom, Solflare) utilizing deterministic BIP-44 key derivation.
 - ABDM (Ayushman Bharat Digital Mission) and FHIR (Fast Healthcare Interoperability Resources) data schema conformance.
 - Formal DPDP (Digital Personal Data Protection Act) statutory privacy impact assessment.
 - Mainnet deployment with stake-weighted quality of service (SWQoS).
@@ -145,7 +145,7 @@ The following items are design goals for future iterations and are not claimed a
 
 ## Benchmark Results
 
-The following data summarizes benchmarks executed on local testnet (20 samples) and Solana Devnet (10 samples, deployed program `6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe`):
+The following data summarizes benchmarks executed on local testnet (20 samples) and Solana Devnet (10 samples, deployed program `52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq`):
 
 | Operation | Cluster | Samples | Mean Latency | p50 Latency | p95 Latency | Mean Compute Units | Mean Fee (SOL) | Retries |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |

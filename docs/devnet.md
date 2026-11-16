@@ -4,15 +4,16 @@
 The SolHealth Anchor smart contract is deployed to Solana Devnet.
 
 ## Deployment Details
-- **Program ID**: `6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe`
-- **Deploy Transaction Signature**: `2QdyTB4G119VNkvXVVXFnf9v87hsPUZ2891596SqVep62kJs9iNYTsDPJz183kf36wry8LoxhbzeLFhjFpT1oZ2e`
+- **Program ID**: `52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq`
+- **Deploy Transaction Signature**: `TYTJVzZ6cpx4rPSBFc3gUqUHbYkCmHLZshfhHHXL4MEdKyTxx6vz1nrEtvMxTm15xSS1wWiVxgHbkZgQ2koQaUs`
 - **Cluster**: `devnet`
-- **Deployment Date**: 2026-10-14
-- **Program Size**: 248,432 bytes
+- **Deployment Date**: 2026-11-17
+- **Program Size**: 229,024 bytes
+- **Program Keypair File**: `target/deploy/solhealth-keypair.json` (Important: back up this file privately and securely offline; never commit keypairs or secrets to version control)
 
 ## Solana Explorer Links
-- **Program Account**: [https://explorer.solana.com/address/6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe?cluster=devnet](https://explorer.solana.com/address/6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe?cluster=devnet)
-- **Deployment Transaction**: [https://explorer.solana.com/tx/2QdyTB4G119VNkvXVVXFnf9v87hsPUZ2891596SqVep62kJs9iNYTsDPJz183kf36wry8LoxhbzeLFhjFpT1oZ2e?cluster=devnet](https://explorer.solana.com/tx/2QdyTB4G119VNkvXVVXFnf9v87hsPUZ2891596SqVep62kJs9iNYTsDPJz183kf36wry8LoxhbzeLFhjFpT1oZ2e?cluster=devnet)
+- **Program Account**: [https://explorer.solana.com/address/52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq?cluster=devnet](https://explorer.solana.com/address/52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq?cluster=devnet)
+- **Deployment Transaction**: [https://explorer.solana.com/tx/TYTJVzZ6cpx4rPSBFc3gUqUHbYkCmHLZshfhHHXL4MEdKyTxx6vz1nrEtvMxTm15xSS1wWiVxgHbkZgQ2koQaUs?cluster=devnet](https://explorer.solana.com/tx/TYTJVzZ6cpx4rPSBFc3gUqUHbYkCmHLZshfhHHXL4MEdKyTxx6vz1nrEtvMxTm15xSS1wWiVxgHbkZgQ2koQaUs?cluster=devnet)
 
 ## Switching Environments
 

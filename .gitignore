@@ -21,6 +21,7 @@ app/.env*
 app/.env.local
 !.env.example
 !app/.env.example
+!app/.env.devnet.example
 *keypair*.json
 *id.json
 scripts/.authority.json
