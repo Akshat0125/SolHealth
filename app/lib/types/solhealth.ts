@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/solhealth.json`.
  */
 export type Solhealth = {
-  "address": "6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe",
+  "address": "52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq",
   "metadata": {
     "name": "solhealth",
     "version": "0.1.0",
@@ -45,7 +45,7 @@ export type Solhealth = {
               },
               {
                 "kind": "account",
-                "path": "record.record_id",
+                "path": "record.recordId",
                 "account": "record"
               }
             ]
@@ -140,7 +140,7 @@ export type Solhealth = {
               },
               {
                 "kind": "account",
-                "path": "record.record_id",
+                "path": "record.recordId",
                 "account": "record"
               }
             ]
@@ -335,6 +335,65 @@ export type Solhealth = {
       ]
     },
     {
+      "name": "registerEncryptionKey",
+      "discriminator": [
+        52,
+        17,
+        28,
+        66,
+        141,
+        254,
+        167,
+        183
+      ],
+      "accounts": [
+        {
+          "name": "encryptionKey",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  110,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "x25519Pubkey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "registerRecord",
       "discriminator": [
         103,
@@ -437,7 +496,7 @@ export type Solhealth = {
               },
               {
                 "kind": "account",
-                "path": "record.record_id",
+                "path": "record.recordId",
                 "account": "record"
               }
             ]
@@ -586,6 +645,19 @@ export type Solhealth = {
       ]
     },
     {
+      "name": "encryptionKey",
+      "discriminator": [
+        6,
+        60,
+        23,
+        105,
+        201,
+        33,
+        233,
+        33
+      ]
+    },
+    {
       "name": "record",
       "discriminator": [
         254,
@@ -653,6 +725,19 @@ export type Solhealth = {
       ]
     },
     {
+      "name": "encryptionKeyRegistered",
+      "discriminator": [
+        58,
+        148,
+        128,
+        158,
+        247,
+        4,
+        231,
+        240
+      ]
+    },
+    {
       "name": "recordAccessed",
       "discriminator": [
         122,
@@ -683,7 +768,7 @@ export type Solhealth = {
     {
       "code": 6000,
       "name": "unauthorized",
-      "msg": "unauthorized"
+      "msg": "Unauthorized"
     },
     {
       "code": 6001,
@@ -709,6 +794,11 @@ export type Solhealth = {
       "code": 6005,
       "name": "keyTooLong",
       "msg": "Key exceeds maximum length of 128"
+    },
+    {
+      "code": 6006,
+      "name": "invalidEncryptionKey",
+      "msg": "Invalid encryption key"
     }
   ],
   "types": [
@@ -872,6 +962,59 @@ export type Solhealth = {
           {
             "name": "authority",
             "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "encryptionKey",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "x25519Pubkey",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "createdAt",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "encryptionKeyRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "version",
+            "type": "u8"
           },
           {
             "name": "timestamp",

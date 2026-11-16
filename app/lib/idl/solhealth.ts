@@ -1,6 +1,6 @@
 // Generated TypeScript IDL wrapper
 export const solhealthIdl = {
-  "address": "6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe",
+  "address": "52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq",
   "metadata": {
     "name": "solhealth",
     "version": "0.1.0",
@@ -330,6 +330,65 @@ export const solhealthIdl = {
       ]
     },
     {
+      "name": "register_encryption_key",
+      "discriminator": [
+        52,
+        17,
+        28,
+        66,
+        141,
+        254,
+        167,
+        183
+      ],
+      "accounts": [
+        {
+          "name": "encryption_key",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  110,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "x25519_pubkey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "register_record",
       "discriminator": [
         103,
@@ -581,6 +640,19 @@ export const solhealthIdl = {
       ]
     },
     {
+      "name": "EncryptionKey",
+      "discriminator": [
+        6,
+        60,
+        23,
+        105,
+        201,
+        33,
+        233,
+        33
+      ]
+    },
+    {
       "name": "Record",
       "discriminator": [
         254,
@@ -648,6 +720,19 @@ export const solhealthIdl = {
       ]
     },
     {
+      "name": "EncryptionKeyRegistered",
+      "discriminator": [
+        58,
+        148,
+        128,
+        158,
+        247,
+        4,
+        231,
+        240
+      ]
+    },
+    {
       "name": "RecordAccessed",
       "discriminator": [
         122,
@@ -704,6 +789,11 @@ export const solhealthIdl = {
       "code": 6005,
       "name": "KeyTooLong",
       "msg": "Key exceeds maximum length of 128"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidEncryptionKey",
+      "msg": "Invalid encryption key"
     }
   ],
   "types": [
@@ -867,6 +957,59 @@ export const solhealthIdl = {
           {
             "name": "authority",
             "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EncryptionKey",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "x25519_pubkey",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EncryptionKeyRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "version",
+            "type": "u8"
           },
           {
             "name": "timestamp",

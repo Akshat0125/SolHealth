@@ -1,11 +1,37 @@
 // Anchor version: 1.0.0
 use anchor_lang::prelude::*;
 
-declare_id!("6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe");
+declare_id!("52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq");
 
 #[program]
 pub mod solhealth {
     use super::*;
+
+    pub fn register_encryption_key(
+        ctx: Context<RegisterEncryptionKey>,
+        x25519_pubkey: [u8; 32],
+        version: u8,
+    ) -> Result<()> {
+        require!(x25519_pubkey != [0u8; 32], SolHealthError::InvalidEncryptionKey);
+
+        let enc_key = &mut ctx.accounts.encryption_key;
+        let owner = &ctx.accounts.owner;
+        let clock = Clock::get()?;
+
+        enc_key.owner = owner.key();
+        enc_key.x25519_pubkey = x25519_pubkey;
+        enc_key.version = version;
+        enc_key.created_at = clock.unix_timestamp;
+        enc_key.bump = ctx.bumps.encryption_key;
+
+        emit!(EncryptionKeyRegistered {
+            owner: owner.key(),
+            version,
+            timestamp: enc_key.created_at,
+        });
+
+        Ok(())
+    }
 
     pub fn initialize_config(ctx: Context<InitializeConfig>) -> Result<()> {
         let config = &mut ctx.accounts.config;
@@ -153,6 +179,21 @@ pub mod solhealth {
 // -----------------------------------------------------------------------------
 
 #[derive(Accounts)]
+pub struct RegisterEncryptionKey<'info> {
+    #[account(
+        init,
+        payer = owner,
+        space = 8 + EncryptionKey::INIT_SPACE,
+        seeds = [b"enc", owner.key().as_ref()],
+        bump
+    )]
+    pub encryption_key: Account<'info, EncryptionKey>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
 pub struct InitializeConfig<'info> {
     #[account(
         init,
@@ -296,6 +337,16 @@ pub struct AccessRecord<'info> {
 
 #[account]
 #[derive(InitSpace)]
+pub struct EncryptionKey {
+    pub owner: Pubkey,
+    pub x25519_pubkey: [u8; 32],
+    pub version: u8,
+    pub created_at: i64,
+    pub bump: u8,
+}
+
+#[account]
+#[derive(InitSpace)]
 pub struct Config {
     pub authority: Pubkey,
     pub bump: u8,
@@ -340,6 +391,13 @@ pub struct Access {
 // -----------------------------------------------------------------------------
 // Events
 // -----------------------------------------------------------------------------
+
+#[event]
+pub struct EncryptionKeyRegistered {
+    pub owner: Pubkey,
+    pub version: u8,
+    pub timestamp: i64,
+}
 
 #[event]
 pub struct CredentialIssued {
@@ -405,4 +463,6 @@ pub enum SolHealthError {
     CidTooLong,
     #[msg("Key exceeds maximum length of 128")]
     KeyTooLong,
+    #[msg("Invalid encryption key")]
+    InvalidEncryptionKey,
 }

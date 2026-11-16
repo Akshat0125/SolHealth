@@ -38,6 +38,12 @@ describe("solhealth", () => {
       program.programId
     )[0];
 
+  const getEncryptionKeyPda = (owner: PublicKey) =>
+    PublicKey.findProgramAddressSync(
+      [Buffer.from("enc"), owner.toBuffer()],
+      program.programId
+    )[0];
+
   async function fundAccount(pubkey: PublicKey, amountSol = 2) {
     const tx = new anchor.web3.Transaction().add(
       SystemProgram.transfer({
@@ -367,5 +373,85 @@ describe("solhealth", () => {
           msg.includes("6003")
       );
     }
+  });
+
+  describe("encryption key registration", () => {
+    const encOwner = Keypair.generate();
+    const validKey = Array.from(Buffer.alloc(32, 7));
+
+    before(async () => {
+      await fundAccount(encOwner.publicKey);
+    });
+
+    it("register succeeds and the stored account matches", async () => {
+      const encPda = getEncryptionKeyPda(encOwner.publicKey);
+      await program.methods
+        .registerEncryptionKey(validKey, 1)
+        .accounts({
+          encryptionKey: encPda,
+          owner: encOwner.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([encOwner])
+        .rpc();
+
+      const encAccount = await program.account.encryptionKey.fetch(encPda);
+      expect(encAccount.owner.toBase58()).to.equal(encOwner.publicKey.toBase58());
+      expect(encAccount.version).to.equal(1);
+      expect(encAccount.x25519Pubkey).to.deep.equal(validKey);
+      expect(encAccount.createdAt.toNumber()).to.be.greaterThan(0);
+    });
+
+    it("fails when registering an all-zero key", async () => {
+      const zeroOwner = Keypair.generate();
+      await fundAccount(zeroOwner.publicKey);
+      const encPda = getEncryptionKeyPda(zeroOwner.publicKey);
+      const zeroKey = Array.from(Buffer.alloc(32, 0));
+
+      try {
+        await program.methods
+          .registerEncryptionKey(zeroKey, 1)
+          .accounts({
+            encryptionKey: encPda,
+            owner: zeroOwner.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([zeroOwner])
+          .rpc();
+        expect.fail("Should have failed for all-zero encryption key");
+      } catch (err: any) {
+        expect(err.toString()).to.satisfy(
+          (msg: string) =>
+            msg.includes("InvalidEncryptionKey") ||
+            msg.includes("Invalid encryption key")
+        );
+      }
+    });
+
+    it("fails on a second registration for the same owner", async () => {
+      const encPda = getEncryptionKeyPda(encOwner.publicKey);
+      const anotherKey = Array.from(Buffer.alloc(32, 9));
+
+      try {
+        await program.methods
+          .registerEncryptionKey(anotherKey, 1)
+          .accounts({
+            encryptionKey: encPda,
+            owner: encOwner.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([encOwner])
+          .rpc();
+        expect.fail("Should have failed to re-register existing encryption key");
+      } catch (err: any) {
+        // init on existing account fails with already in use
+        expect(err.toString()).to.satisfy(
+          (msg: string) =>
+            msg.includes("already in use") ||
+            msg.includes("custom program error: 0x0") ||
+            msg.includes("AccountAlreadyInitialized")
+        );
+      }
+    });
   });
 });

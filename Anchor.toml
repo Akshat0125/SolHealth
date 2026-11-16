@@ -6,10 +6,10 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-solhealth = "6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe"
+solhealth = "52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq"
 
 [programs.devnet]
-solhealth = "6EZgFcGtnBqhor99gzCoqyzqRpfrU9fyP6NRUuqqS7xe"
+solhealth = "52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq"
 
 [provider]
 # To switch between networks:
@@ -19,7 +19,7 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "node -e 'const fs=require(\"fs\"); const p=\"node_modules/yargs/package.json\"; if(fs.existsSync(p)){const j=JSON.parse(fs.readFileSync(p,\"utf8\"));j.type=\"commonjs\";fs.writeFileSync(p,JSON.stringify(j,null,2));}' && yarn run ts-mocha -p ./tsconfig.json -t 1000000 'tests/**/*.ts'"
 
 [hooks]
 
