@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useSolhealth } from "@/lib/solhealth-context";
 import { CLUSTER } from "@/lib/config";
 import { GlassButton } from "@/components/GlassButton";
+import { StepRow } from "@/components/StepRow";
 
 export default function HomePage() {
   const {
@@ -58,7 +59,7 @@ export default function HomePage() {
           {/* LEFT HALF: BRAND & HOW IT WORKS                           */}
           {/* ======================================================== */}
           <div
-            className="p-8 sm:p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden"
+            className="p-5 sm:p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden"
             style={{
               background:
                 "linear-gradient(160deg, #fff1a8 0%, #fff8d6 45%, #ffffff 100%)",
@@ -130,7 +131,7 @@ export default function HomePage() {
           {/* ======================================================== */}
           {/* RIGHT HALF: CONNECT WALLET OR GET STARTED CHECKLIST      */}
           {/* ======================================================== */}
-          <div className="p-8 sm:p-10 lg:p-12 flex flex-col justify-center bg-white">
+          <div className="p-5 sm:p-10 lg:p-12 flex flex-col justify-center bg-white">
             <div className="max-w-[420px] w-full mx-auto space-y-6">
               {!mounted ? (
                 <div className="space-y-4 py-8 animate-pulse">
@@ -181,7 +182,7 @@ export default function HomePage() {
                                 {w.adapter.name}
                               </span>
                             </div>
-                            <span className="text-xs font-mono font-medium text-[#17803d] bg-[#e3f6e9] px-2.5 py-0.5 rounded-full">
+                            <span data-ui="pill" className="text-xs font-mono font-medium text-[#17803d] bg-[#e3f6e9] px-2.5 py-0.5 rounded-full status-pill status-pill-ok">
                               Connect
                             </span>
                           </button>
@@ -194,10 +195,11 @@ export default function HomePage() {
                         Don’t have a Solana wallet yet?
                       </p>
                       <a
+                        data-ui="btn"
                         href="https://phantom.app/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#f9c933] text-[#1b1f2a] font-headline font-bold text-xs shadow-xs hover:bg-[#ebd052] transition-colors"
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-[#f9c933] text-[#1b1f2a] font-headline font-bold text-xs shadow-xs hover:bg-[#ebd052] transition-colors"
                       >
                         Install Phantom ↗
                       </a>
@@ -238,68 +240,57 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  {/* 3-Step Checklist */}
-                  <div className="p-4 rounded-[22px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] space-y-2.5">
+                  {/* 3-Step Checklist using shared StepRow */}
+                  <div className="p-4 rounded-[22px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)]">
                     {/* Step 1: Wallet connected */}
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 font-medium text-[#1b1f2a]">
-                        <span className="w-5 h-5 rounded-full bg-[#e3f6e9] text-[#17803d] font-bold flex items-center justify-center text-[10px]">
-                          ✓
+                    <StepRow
+                      status="done"
+                      number={1}
+                      label="Wallet connected"
+                      right={
+                        <span data-ui="pill" className="status-pill status-pill-ok font-mono text-[11px] font-semibold">
+                          Ready
                         </span>
-                        <span>1. Wallet connected</span>
-                      </div>
-                      <span className="font-mono text-[#17803d] font-semibold text-[11px]">
-                        Ready
-                      </span>
-                    </div>
+                      }
+                    />
 
-                    {/* Step 2: Encryption activated */}
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 font-medium text-[#1b1f2a]">
-                        {encryptionStatus === "ready" ? (
-                          <span className="w-5 h-5 rounded-full bg-[#e3f6e9] text-[#17803d] font-bold flex items-center justify-center text-[10px]">
-                            ✓
+                    {/* Step 2: Encryption session */}
+                    <StepRow
+                      status={encryptionStatus === "ready" ? "done" : "active"}
+                      number={2}
+                      label="Encryption session"
+                      right={
+                        encryptionStatus === "ready" ? (
+                          <span data-ui="pill" className="status-pill status-pill-ok font-mono text-[11px] font-semibold">
+                            Active
                           </span>
                         ) : (
-                          <span className="w-5 h-5 rounded-full bg-[#fff1cc] text-[#8a5a00] font-bold flex items-center justify-center text-[10px]">
-                            2
-                          </span>
-                        )}
-                        <span>2. Encryption session</span>
-                      </div>
-
-                      {encryptionStatus === "ready" ? (
-                        <span className="font-mono text-[#17803d] font-semibold text-[11px]">
-                          Active
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={handleActivate}
-                          disabled={activating}
-                          className="px-2.5 py-1 rounded-full bg-[#f9c933] text-[#1b1f2a] font-headline font-bold text-[11px] shadow-xs hover:bg-[#ebd052] disabled:opacity-50"
-                        >
-                          {activating ? "Activating..." : "Activate"}
-                        </button>
-                      )}
-                    </div>
-
-                    {encryptionError && (
-                      <div className="p-2.5 rounded-[12px] bg-[#fde8e6] border border-[#fbd0cb] text-[11px] text-[#b42318] leading-relaxed">
-                        {encryptionError}
-                      </div>
-                    )}
+                          <GlassButton
+                            variant="primary"
+                            size="sm"
+                            onClick={handleActivate}
+                            disabled={activating}
+                            loading={activating}
+                            loadingText="Activating..."
+                          >
+                            Activate
+                          </GlassButton>
+                        )
+                      }
+                      error={encryptionError}
+                    />
 
                     {/* Step 3: Choose your role */}
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 font-medium text-[#1b1f2a]">
-                        <span className="w-5 h-5 rounded-full bg-black/5 text-[#6b7280] font-bold flex items-center justify-center text-[10px]">
-                          3
+                    <StepRow
+                      status="waiting"
+                      number={3}
+                      label="Choose your role"
+                      right={
+                        <span data-ui="pill" className="status-pill bg-gray-100 text-[#6b7280] text-[11px]">
+                          Select below
                         </span>
-                        <span>3. Choose your role</span>
-                      </div>
-                      <span className="text-[#6b7280] text-[11px]">Select below</span>
-                    </div>
+                      }
+                    />
                   </div>
 
                   {/* Three Role Cards with eligibility text and single-blink hover */}
@@ -308,10 +299,11 @@ export default function HomePage() {
                     <div className="space-y-1">
                       <button
                         type="button"
+                        data-ui="btn"
                         onClick={() => handleSelectRole("/publisher")}
                         className="home-role-pill"
                       >
-                        <span>Enter as Publisher</span>
+                        Enter as Publisher
                       </button>
                       <p className="text-xs text-center text-[#6b7280]">
                         {isPublisher
@@ -326,10 +318,11 @@ export default function HomePage() {
                     <div className="space-y-1">
                       <button
                         type="button"
+                        data-ui="btn"
                         onClick={() => handleSelectRole("/patient")}
                         className="home-role-pill"
                       >
-                        <span>Enter as Patient</span>
+                        Enter as Patient
                       </button>
                       <p className="text-xs text-center text-[#6b7280]">
                         Ready to upload, encrypt, and share records
@@ -340,10 +333,11 @@ export default function HomePage() {
                     <div className="space-y-1">
                       <button
                         type="button"
+                        data-ui="btn"
                         onClick={() => handleSelectRole("/doctor")}
                         className="home-role-pill"
                       >
-                        <span>Enter as Doctor</span>
+                        Enter as Doctor
                       </button>
                       <p className="text-xs text-center text-[#6b7280]">
                         {isDoctor

@@ -40,6 +40,7 @@ export function GlassButton({
   return (
     <button
       {...props}
+      data-ui="btn"
       disabled={disabled || loading}
       className={`glass-btn ${variantClass} ${sizeClass} ${className}`}
     >

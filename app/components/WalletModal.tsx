@@ -56,6 +56,7 @@ export function WalletModal() {
             </p>
           </div>
           <button
+            data-ui="btn"
             onClick={closeWalletModal}
             className="w-8 h-8 rounded-full flex items-center justify-center text-[#6b7280] hover:text-[#1b1f2a] hover:bg-black/5 transition-colors"
             aria-label="Close modal"
@@ -89,7 +90,7 @@ export function WalletModal() {
                     {w.adapter.name}
                   </span>
                 </div>
-                <span className="text-xs font-mono font-medium text-[#17803d] bg-[#e3f6e9] px-2 py-0.5 rounded-full">
+                <span data-ui="pill" className="text-xs font-mono font-medium text-[#17803d] bg-[#e3f6e9] px-2 py-0.5 rounded-full status-pill status-pill-ok">
                   Detected
                 </span>
               </button>
@@ -100,6 +101,7 @@ export function WalletModal() {
                 No installed Solana wallets detected.
               </p>
               <a
+                data-ui="btn"
                 href="https://phantom.app/"
                 target="_blank"
                 rel="noopener noreferrer"

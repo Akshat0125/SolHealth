@@ -111,10 +111,10 @@ export function Navbar() {
             </div>
 
             {/* Right: Demo switcher (if active) & Single Wallet Button */}
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {/* Demo Mode switcher chip when demo is enabled */}
               {demoEnabled && useDemo && (
-                <div className="flex items-center bg-[#fff8d6] border border-[#fde293] px-2.5 py-1 rounded-full text-xs font-medium text-[#8a5a00] gap-1.5">
+                <div className="flex items-center bg-[#fff8d6] border border-[#fde293] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium text-[#8a5a00] gap-1 sm:gap-1.5 shrink-0">
                   <span className="font-bold">Demo:</span>
                   <select
                     value={demoRole}
@@ -134,6 +134,7 @@ export function Navbar() {
               ) : !connected || !publicKey ? (
                 <button
                   type="button"
+                  data-ui="btn"
                   onClick={openWalletModal}
                   className="px-4 py-2 rounded-full bg-[#f9c933] text-[#1b1f2a] font-headline font-bold text-xs shadow-xs hover:bg-[#ebd052] transition-all hover:scale-102 active:scale-98"
                 >
@@ -144,12 +145,13 @@ export function Navbar() {
                   {/* Connected Wallet Pill */}
                   <button
                     type="button"
+                    data-ui="btn"
                     onClick={() => setDropdownOpen((prev) => !prev)}
-                    className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white border border-[rgba(27,31,42,0.08)] shadow-[0_2px_8px_rgba(27,31,42,0.04)] hover:border-[#f9c933] transition-all text-xs font-medium text-[#1b1f2a]"
+                    className="flex items-center gap-[10px] px-3.5 py-1.5 rounded-full bg-white border border-[rgba(27,31,42,0.08)] shadow-[0_2px_8px_rgba(27,31,42,0.04)] hover:border-[#f9c933] transition-all text-xs font-medium text-[#1b1f2a]"
                   >
-                    <span className="w-2 h-2 rounded-full bg-[#17803d]" />
-                    <span className="font-mono font-bold">{shortAddress}</span>
-                    <span className="text-xs text-[#6b7280]">
+                    <span className="w-3 h-3 min-w-3 min-h-3 rounded-full bg-[#17803d] shrink-0" />
+                    <span className="font-mono font-bold truncate max-w-[120px] sm:max-w-none">{shortAddress}</span>
+                    <span className="hidden sm:inline text-xs text-[#6b7280] whitespace-nowrap">
                       {balance.toFixed(2)} SOL
                     </span>
                     <span className="text-[10px] text-[#6b7280]">▼</span>
@@ -172,6 +174,7 @@ export function Navbar() {
                           </span>
                           <button
                             type="button"
+                            data-ui="btn"
                             onClick={copyAddress}
                             className="font-headline font-bold text-[10px] text-[#8a5a00] hover:bg-[#fff1cc] px-1.5 py-0.5 rounded-md transition-colors"
                           >
@@ -186,7 +189,7 @@ export function Navbar() {
                         <div className="flex items-center gap-1.5 font-bold font-mono text-[#1b1f2a]">
                           <span>{balance.toFixed(4)} SOL</span>
                           {lowBalance && (
-                            <span className="text-[10px] text-[#b42318] bg-[#fde8e6] px-1.5 py-0.2 rounded-full">
+                            <span data-ui="pill" className="text-[10px] text-[#b42318] bg-[#fde8e6] px-1.5 py-0.2 rounded-full">
                               Low SOL
                             </span>
                           )}
@@ -200,17 +203,17 @@ export function Navbar() {
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {isPublisher && (
-                            <span className="px-2 py-0.5 rounded-full bg-[#fff1cc] text-[#8a5a00] font-bold text-[11px]">
+                            <span data-ui="pill" className="px-2 py-0.5 rounded-full bg-[#fff1cc] text-[#8a5a00] font-bold text-[11px]">
                               Publisher
                             </span>
                           )}
                           {isDoctor && (
-                            <span className="px-2 py-0.5 rounded-full bg-[#e3f6e9] text-[#17803d] font-bold text-[11px]">
+                            <span data-ui="pill" className="px-2 py-0.5 rounded-full bg-[#e3f6e9] text-[#17803d] font-bold text-[11px]">
                               Doctor
                             </span>
                           )}
                           {isPatient && (
-                            <span className="px-2 py-0.5 rounded-full bg-white border border-[rgba(27,31,42,0.08)] text-[#1b1f2a] font-medium text-[11px]">
+                            <span data-ui="pill" className="px-2 py-0.5 rounded-full bg-white border border-[rgba(27,31,42,0.08)] text-[#1b1f2a] font-medium text-[11px]">
                               Patient
                             </span>
                           )}
@@ -220,6 +223,7 @@ export function Navbar() {
                       {/* Actions */}
                       <div className="space-y-1.5 pt-2 border-t border-[rgba(27,31,42,0.06)]">
                         <a
+                          data-ui="btn"
                           href={makeExplorerUrl(publicKey.toBase58(), "address")}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -231,6 +235,7 @@ export function Navbar() {
 
                         <button
                           type="button"
+                          data-ui="btn"
                           onClick={handleGetSol}
                           disabled={airdropLoading}
                           className="w-full flex items-center justify-between px-3 py-1.5 rounded-[12px] bg-[#fff9e6] hover:bg-[#fff1cc] text-[#8a5a00] font-semibold transition-colors disabled:opacity-50"
@@ -243,6 +248,7 @@ export function Navbar() {
                           <div className="p-2 rounded-[12px] bg-[#fde8e6] border border-[#fbd0cb] text-[11px] text-[#b42318] space-y-1">
                             <div>The public faucet is rate limited.</div>
                             <a
+                              data-ui="btn"
                               href="https://faucet.solana.com"
                               target="_blank"
                               rel="noopener noreferrer"
@@ -261,6 +267,7 @@ export function Navbar() {
 
                         <button
                           type="button"
+                          data-ui="btn"
                           onClick={async () => {
                             setDropdownOpen(false);
                             await disconnectWallet();

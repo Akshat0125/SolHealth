@@ -6,6 +6,7 @@ import { useRole, Role } from "@/lib/roles";
 import { formatShortAddress } from "@/lib/format";
 import { GlassButton } from "@/components/GlassButton";
 import { makeExplorerUrl, StepItem } from "@/components/StepStatus";
+import { StepRow } from "@/components/StepRow";
 
 export interface ChecklistStep {
   number: string;
@@ -102,9 +103,9 @@ export function RolePage({
         {/* ======================================================== */}
         {/* HEADER                                                   */}
         {/* ======================================================== */}
-        <header className="space-y-4">
+        <header>
           {/* Pill Breadcrumb */}
-          <nav aria-label="Breadcrumb">
+          <nav aria-label="Breadcrumb" className="mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[rgba(27,31,42,0.08)] shadow-xs text-xs font-headline font-semibold text-[#6b7280]">
               <Link href="/" className="hover:text-[#1b1f2a]">
                 Home
@@ -115,19 +116,19 @@ export function RolePage({
           </nav>
 
           {/* Title as a plain question + one line helper */}
-          <div className="space-y-1.5 max-w-3xl">
-            <h1 className="font-headline text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1b1f2a] tracking-tight leading-[1.05]">
+          <div>
+            <h1 className="font-headline text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1b1f2a] tracking-tight leading-[1.1] mb-[12px]">
               {titleQuestion}
             </h1>
-            <p className="text-sm sm:text-base text-[#6b7280] font-body leading-relaxed">
+            <p className="max-w-[65ch] text-sm sm:text-base text-[#6b7280] font-body leading-[1.5] mb-[16px]">
               <span className="font-semibold text-[#1b1f2a]">What you can do here: </span>
               {whatYouCanDo}
             </p>
           </div>
 
           {/* Progress Checklist (Horizontal row of step chips, wraps on mobile) */}
-          <div className="pt-2">
-            <div className="flex flex-wrap items-center gap-2.5">
+          <div className="overflow-visible py-1">
+            <div className="flex flex-wrap items-center gap-2.5 overflow-visible">
               {checklist.map((step) => {
                 let statusClasses = "bg-white/80 text-[#6b7280] border-[rgba(27,31,42,0.1)]";
                 let statusBadge = "Waiting";
@@ -146,14 +147,20 @@ export function RolePage({
                 return (
                   <button
                     key={step.number}
+                    data-ui="btn"
                     type="button"
                     onClick={() => handleScrollToCard(step.targetCardId)}
-                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-headline transition-all cursor-pointer hover:brightness-95 ${statusClasses}`}
+                    className={`inline-flex items-center gap-2 h-[40px] px-[14px] rounded-full border text-xs font-headline transition-all cursor-pointer hover:brightness-95 select-none shrink-0 leading-[1.2] ${statusClasses}`}
                     title={`Click to scroll to step ${step.number}`}
                   >
-                    <span className="font-mono font-bold">{step.number}</span>
-                    <span>{step.label}</span>
-                    <span className={`text-[10px] uppercase font-bold px-1.5 py-0.2 rounded-full ${badgeClass}`}>
+                    <span className="w-[22px] h-[22px] min-w-[22px] min-h-[22px] rounded-full bg-black/5 flex items-center justify-center font-mono font-bold text-[11px] leading-none shrink-0">
+                      {step.number}
+                    </span>
+                    <span className="font-semibold">{step.label}</span>
+                    <span
+                      data-ui="pill"
+                      className={`inline-flex items-center justify-center h-[20px] px-2 rounded-full text-[11px] font-bold uppercase leading-none whitespace-nowrap ${badgeClass}`}
+                    >
                       {statusBadge}
                     </span>
                   </button>
@@ -172,9 +179,9 @@ export function RolePage({
           <div className="block lg:hidden">
             <div className="soft-card p-4 space-y-3 bg-white">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-row items-center gap-[10px]">
                   <span className={`role-dot ${ready ? "role-dot-active" : "role-dot-inactive"}`} />
-                  <span className="font-headline font-bold text-sm text-[#1b1f2a]">
+                  <span className="font-headline font-bold text-sm text-[#1b1f2a] leading-[1.2]">
                     Acting as {roleTitle}
                   </span>
                 </div>
@@ -184,8 +191,9 @@ export function RolePage({
               </div>
 
               <div className="flex items-center justify-between text-xs font-mono text-[#6b7280] bg-[#fffdf6] p-2 rounded-lg border border-[rgba(27,31,42,0.06)]">
-                <span>{shortAddress}</span>
+                <span className="truncate max-w-[200px]">{shortAddress}</span>
                 <button
+                  data-ui="btn"
                   onClick={handleCopy}
                   className="font-bold text-[#8a5a00] hover:underline"
                 >
@@ -223,9 +231,9 @@ export function RolePage({
                 <div className="text-[11px] font-headline font-bold uppercase tracking-wider text-[#6b7280]">
                   You are acting as
                 </div>
-                <div className="flex items-center gap-2.5">
+                <div className="flex flex-row items-center gap-[10px]">
                   <span className={`role-dot ${ready ? "role-dot-active" : "role-dot-inactive"}`} />
-                  <h2 className="font-headline text-lg font-bold text-[#1b1f2a]">
+                  <h2 className="font-headline text-lg font-bold text-[#1b1f2a] leading-[1.2]">
                     {roleTitle}
                   </h2>
                 </div>
@@ -245,6 +253,7 @@ export function RolePage({
                     <span className="font-bold text-[#1b1f2a]">{shortAddress}</span>
                     <button
                       type="button"
+                      data-ui="btn"
                       onClick={handleCopy}
                       disabled={!ready || !address}
                       className="text-[10px] font-headline font-bold uppercase text-[#8a5a00] hover:text-[#1b1f2a] px-1.5 py-0.5 rounded bg-white border border-[rgba(27,31,42,0.08)] disabled:opacity-40"
@@ -336,13 +345,15 @@ export function StepCard({
 }: StepCardProps) {
   return (
     <section id={id} className="soft-card p-6 sm:p-8 space-y-6 bg-white">
-      {/* Header */}
-      <div className="flex items-start gap-3.5 pb-4 border-b border-[rgba(27,31,42,0.08)]">
-        <span className="w-9 h-9 rounded-full bg-[#f9c933] text-[#1b1f2a] font-headline font-extrabold text-sm flex items-center justify-center shrink-0 shadow-xs">
-          {stepNumber}
-        </span>
-        <div className="space-y-0.5">
-          <h2 className="font-headline text-xl sm:text-2xl font-bold text-[#1b1f2a]">
+      {/* Header: grid columns [40px 1fr], column-gap 16px, badge vertically centered with FIRST line of title */}
+      <div className="grid grid-cols-[40px_1fr] gap-x-4 items-start pb-4 border-b border-[rgba(27,31,42,0.08)]">
+        <div className="flex items-center justify-center -mt-[6px]">
+          <span className="w-10 h-10 min-w-10 min-h-10 rounded-full bg-[#f9c933] text-[#1b1f2a] font-headline font-extrabold text-sm sm:text-base grid place-items-center shrink-0 shadow-xs">
+            <span className="leading-none">{stepNumber}</span>
+          </span>
+        </div>
+        <div className="space-y-1">
+          <h2 className="font-headline text-xl sm:text-2xl font-bold text-[#1b1f2a] leading-[1.2]">
             {title}
           </h2>
           <p className="text-xs sm:text-sm text-[#6b7280] font-body leading-relaxed">
@@ -394,43 +405,41 @@ export function InlineResultArea({
     <div className="space-y-3 pt-3 border-t border-[rgba(27,31,42,0.08)]">
       {/* Multi-step progress list */}
       {steps.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-1">
           {steps.map((step, idx) => {
+            let stepStatus: "done" | "active" | "waiting" = "waiting";
             let pillClass = "bg-gray-100 text-[#6b7280]";
             let pillText = "Waiting";
 
             if (step.status === "running") {
+              stepStatus = "active";
               pillClass = "status-pill-warn";
               pillText = "Active";
             } else if (step.status === "done") {
+              stepStatus = "done";
               pillClass = "status-pill-ok";
               pillText = "Done";
             } else if (step.status === "error") {
+              stepStatus = "active";
               pillClass = "status-pill-danger";
               pillText = "Failed";
             }
 
-            // Strip any accidental leading digits/spaces from step.name so numbering is never doubled
             const cleanName = step.name.replace(/^\d+\s*/, "");
 
             return (
-              <div
+              <StepRow
                 key={idx}
-                className="flex items-center justify-between p-2.5 rounded-[14px] bg-[#fffdf6] border border-[rgba(27,31,42,0.06)] text-xs"
-              >
-                <div className="font-medium text-[#1b1f2a]">
-                  <span className="font-mono text-[#8a5a00] mr-2">
-                    {String(idx + 1).padStart(2, "0")}
+                status={stepStatus}
+                number={idx + 1}
+                label={cleanName}
+                helper={step.detail && step.status !== "error" ? step.detail : undefined}
+                right={
+                  <span data-ui="pill" className={`status-pill ${pillClass}`}>
+                    {pillText}
                   </span>
-                  {cleanName}
-                  {step.detail && step.status !== "error" && (
-                    <span className="text-[#6b7280] font-mono ml-2">
-                      ({step.detail})
-                    </span>
-                  )}
-                </div>
-                <span className={`status-pill ${pillClass}`}>{pillText}</span>
-              </div>
+                }
+              />
             );
           })}
         </div>
@@ -524,6 +533,7 @@ export function TechnicalDetails({
               </span>
               <button
                 type="button"
+                data-ui="btn"
                 onClick={() => copyVal(item.label, item.value)}
                 className="text-[10px] font-sans font-semibold uppercase text-[#8a5a00] hover:underline px-1 py-0.5"
               >

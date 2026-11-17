@@ -410,8 +410,11 @@ export default function DoctorPage() {
             This wallet is not verified yet. Send this address to the Publisher. Only doctors with active on-chain credentials issued by the medical authority can open patient records.
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="font-mono text-xs bg-white px-3 py-1.5 rounded-[14px] border border-[rgba(27,31,42,0.1)] text-[#1b1f2a]">
+            <span className="font-mono text-xs bg-white px-3 py-1.5 rounded-[14px] border border-[rgba(27,31,42,0.1)] text-[#1b1f2a] hidden sm:inline">
               {publicKey?.toBase58()}
+            </span>
+            <span className="font-mono text-xs bg-white px-3 py-1.5 rounded-[14px] border border-[rgba(27,31,42,0.1)] text-[#1b1f2a] sm:hidden">
+              {publicKey ? formatShortAddress(publicKey.toBase58(), 8) : "----"}
             </span>
             <GlassButton variant="secondary" size="sm" onClick={copyDoctorAddress}>
               {copied ? "COPIED" : "Copy Address"}
@@ -423,7 +426,7 @@ export default function DoctorPage() {
       {/* Encryption Activation Prompt */}
       {mounted && connected && isDoctor && encryptionStatus !== "ready" && (
         <div className="p-5 rounded-[22px] bg-[#fff9e6] border border-[#fde293] space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-4 sm:gap-6">
             <div>
               <div className="font-headline font-bold text-sm text-[#8a5a00]">
                 Encryption Session Inactive
@@ -439,7 +442,7 @@ export default function DoctorPage() {
               loading={activating}
               loadingText="Activating..."
             >
-              Activate encryption
+              Activate
             </GlassButton>
           </div>
         </div>

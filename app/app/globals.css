@@ -26,6 +26,13 @@
   --card-radius: 24px;
   --pill-radius: 999px;
   --table-radius: 16px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
   
   --shadow-card: 0 12px 32px rgba(27, 31, 42, 0.08);
   --shadow-input: 0 4px 12px rgba(27, 31, 42, 0.06);
@@ -40,9 +47,14 @@
   --font-mono: var(--font-mono);
 }
 
-* {
+*, *::before, *::after {
   box-sizing: border-box;
   transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body {
@@ -71,13 +83,19 @@ body {
 
 /* Glass Buttons (clickable things) */
 .glass-btn,
-.btn {
+.btn,
+[data-ui="btn"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--pill-radius);
+  gap: 8px;
+  white-space: nowrap;
   min-height: 44px;
-  padding: 11px 22px;
+  padding: 0 24px;
+  line-height: 1.2;
+  flex: none;
+  box-sizing: border-box;
+  border-radius: var(--pill-radius);
   font-family: var(--font-jakarta), sans-serif;
   font-weight: 600;
   font-size: 14px;
@@ -89,29 +107,32 @@ body {
   user-select: none;
   text-decoration: none;
   transition: all 160ms ease;
-  line-height: 1.25;
 }
 
 .glass-btn:hover:not(:disabled),
-.btn:hover:not(:disabled) {
+.btn:hover:not(:disabled),
+[data-ui="btn"]:hover:not(:disabled) {
   transform: translateY(-1px);
   filter: brightness(1.03);
 }
 
 .glass-btn:active:not(:disabled),
-.btn:active:not(:disabled) {
+.btn:active:not(:disabled),
+[data-ui="btn"]:active:not(:disabled) {
   transform: translateY(1px);
   box-shadow: 0 4px 10px rgba(27, 31, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .glass-btn:focus-visible,
-.btn:focus-visible {
+.btn:focus-visible,
+[data-ui="btn"]:focus-visible {
   outline: 3px solid rgba(249, 201, 51, 0.6);
   outline-offset: 2px;
 }
 
 .glass-btn:disabled,
-.btn:disabled {
+.btn:disabled,
+[data-ui="btn"]:disabled {
   opacity: 0.5;
   box-shadow: none;
   cursor: not-allowed;
@@ -165,6 +186,7 @@ body {
   padding: 0 14px;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.2;
   background-color: rgba(255, 255, 255, 0.55);
   color: #1b1f2a;
   box-shadow: 0 4px 12px rgba(27, 31, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.85);
@@ -187,6 +209,7 @@ body {
   height: 36px;
   padding: 0 16px;
   font-size: 13px;
+  line-height: 1.2;
 }
 
 @supports not (backdrop-filter: blur(1px)) {
@@ -270,15 +293,20 @@ body {
 }
 
 /* Status Pill Tags */
-.status-pill {
+.status-pill,
+[data-ui="pill"] {
   display: inline-flex;
   align-items: center;
-  padding: 3px 12px;
+  justify-content: center;
+  height: 24px;
+  padding: 0 10px;
   border-radius: var(--pill-radius);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1;
   white-space: nowrap;
+  box-sizing: border-box;
+  flex: none;
 }
 
 .status-pill-ok {
@@ -325,13 +353,15 @@ body {
   font-weight: 700;
   letter-spacing: 0.02em;
   border-bottom: 1px solid var(--hairline);
+  vertical-align: middle;
 }
 
 .soft-table td {
-  padding: 14px 18px;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--hairline);
   font-size: 13.5px;
   background-color: #ffffff;
+  vertical-align: middle;
 }
 
 .soft-table tr:last-child td {
@@ -344,13 +374,14 @@ body {
 
 /* Role Dot */
 .role-dot {
-  width: 10px;
-  height: 10px;
-  min-width: 10px;
-  min-height: 10px;
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  min-height: 12px;
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .role-dot-active {
@@ -361,6 +392,14 @@ body {
 .role-dot-inactive {
   background-color: #ffffff;
   box-shadow: 0 0 0 1.5px #9ca3af;
+}
+
+.role-dot-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.2;
 }
 
 /* Three Dot Pulse Loading */
@@ -428,12 +467,17 @@ body {
 }
 
 .home-role-pill {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
   width: 100%;
-  min-height: 46px;
-  padding: 12px 28px;
+  min-height: 44px;
+  padding: 0 24px;
+  line-height: 1.2;
+  flex: none;
+  box-sizing: border-box;
   border-radius: var(--pill-radius);
   background-color: rgba(255, 255, 255, 0.75);
   color: #1b1f2a;

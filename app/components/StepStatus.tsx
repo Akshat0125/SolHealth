@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import { formatShortAddress } from "@/lib/format";
+import { StepRow } from "@/components/StepRow";
 
 export interface StepItem {
   name: string;
@@ -74,8 +75,9 @@ export function StepStatusArea({
         </div>
         {onClear && !isAnyRunning && (
           <button
+            data-ui="btn"
             onClick={onClear}
-            className="text-xs font-headline font-semibold text-[#6b7280] hover:text-[#1b1f2a] px-2 py-1 rounded-full hover:bg-gray-100"
+            className="text-xs font-headline font-semibold text-[#6b7280] hover:text-[#1b1f2a] px-3 py-1 rounded-full hover:bg-gray-100 transition-colors"
           >
             Dismiss
           </button>
@@ -84,42 +86,41 @@ export function StepStatusArea({
 
       {/* Numbered Step List */}
       {steps.length > 0 && (
-        <div className="space-y-2.5 mb-4">
+        <div className="space-y-1 mb-4">
           {steps.map((step, idx) => {
+            let stepStatus: "done" | "active" | "waiting" = "waiting";
             let pillClass = "bg-gray-100 text-[#6b7280]";
             let pillText = "Waiting";
 
             if (step.status === "running") {
+              stepStatus = "active";
               pillClass = "status-pill-warn";
               pillText = "Active";
             } else if (step.status === "done") {
+              stepStatus = "done";
               pillClass = "status-pill-ok";
               pillText = "Done";
             } else if (step.status === "error") {
+              stepStatus = "active";
               pillClass = "status-pill-danger";
               pillText = "Failed";
             }
 
+            const cleanName = step.name.replace(/^\d+\s*/, "");
+
             return (
-              <div
+              <StepRow
                 key={idx}
-                className="flex items-start justify-between p-3.5 rounded-[16px] bg-[#fffdf6] border border-[rgba(27,31,42,0.06)]"
-              >
-                <div>
-                  <div className="font-headline font-semibold text-sm text-[#1b1f2a]">
-                    <span className="font-mono text-xs text-[#8a5a00] mr-2">
-                      {String(idx + 1).padStart(2, "0")}
-                    </span>
-                    {step.name}
-                  </div>
-                  {step.detail && (
-                    <div className="font-mono text-xs text-[#6b7280] mt-0.5">
-                      {step.detail}
-                    </div>
-                  )}
-                </div>
-                <span className={`status-pill ${pillClass}`}>{pillText}</span>
-              </div>
+                status={stepStatus}
+                number={idx + 1}
+                label={cleanName}
+                helper={step.detail}
+                right={
+                  <span data-ui="pill" className={`status-pill ${pillClass}`}>
+                    {pillText}
+                  </span>
+                }
+              />
             );
           })}
         </div>
@@ -154,6 +155,7 @@ export function StepStatusArea({
                 Transaction:
               </span>
               <a
+                data-ui="btn"
                 href={makeExplorerUrl(txSignature)}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -173,6 +175,7 @@ export function ExplorerTxBadge({ txSignature }: { txSignature: string }) {
   const cluster = getExplorerCluster();
   return (
     <a
+      data-ui="pill"
       href={makeExplorerUrl(txSignature)}
       target="_blank"
       rel="noopener noreferrer"

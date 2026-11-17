@@ -355,7 +355,7 @@ export default function PublisherPage() {
         }
       >
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-4 sm:gap-6">
             <div className="space-y-1">
               <div className="text-xs font-headline font-semibold text-[#6b7280]">
                 Registry Status
@@ -457,10 +457,11 @@ export default function PublisherPage() {
               <span className="text-xs text-[#6b7280]">Demo Doctor:</span>
               <button
                 type="button"
+                data-ui="btn"
                 onClick={() => setDoctorInput(demoKeypairs.doctor.publicKey.toBase58())}
                 className="text-xs font-mono font-medium text-[#8a5a00] hover:underline bg-[#fff9e6] px-2 py-0.5 rounded-md"
               >
-                Paste Demo Doctor Address
+                Paste Demo Doctor
               </button>
             </div>
           )}
@@ -494,7 +495,7 @@ export default function PublisherPage() {
             {credentials.map((cred) => (
               <div
                 key={cred.publicKey.toBase58()}
-                className="p-4 rounded-[20px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="p-4 rounded-[20px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-4 sm:gap-6"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 font-mono text-xs">

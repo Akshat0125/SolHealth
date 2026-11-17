@@ -30,3 +30,4 @@ scripts/.authority.json
 .DS_Store
 Thumbs.db
 .surfpool
+ui-audit/

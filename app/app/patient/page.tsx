@@ -927,7 +927,7 @@ export default function PatientPage() {
 
       {encryptionStatus !== "ready" && encryptionStatus !== "mismatch" && (
         <div className="p-5 rounded-[22px] bg-[#fffdf6] border border-[rgba(27,31,42,0.12)] space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-4 sm:gap-6">
             <div>
               <div className="font-headline font-bold text-sm text-[#1b1f2a]">
                 Activate encryption session
@@ -943,7 +943,7 @@ export default function PatientPage() {
               loading={encryptionStatus === "activating"}
               loadingText="Activating..."
             >
-              Activate encryption session
+              Activate
             </GlassButton>
           </div>
           {encryptionError && (
@@ -1317,7 +1317,7 @@ export default function PatientPage() {
                           return (
                             <div
                               key={grant.pda}
-                              className="p-3 rounded-[16px] bg-white border border-[rgba(27,31,42,0.06)] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                              className="p-3 rounded-[16px] bg-white border border-[rgba(27,31,42,0.06)] grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-3 sm:gap-4"
                             >
                               <div className="flex items-center gap-2.5">
                                 <span className="font-mono text-xs font-bold text-[#1b1f2a]">
