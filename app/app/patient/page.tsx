@@ -18,6 +18,8 @@ import {
   listRecordsByPatient, 
   listAllAccess, 
   getRecord,
+  getRecordPda,
+  getAccessPda,
   getEncryptionKey,
   mapProgramError,
   getSolanaConnection,
@@ -105,6 +107,7 @@ export default function PatientPage() {
   const [grants, setGrants] = useState<GrantItem[]>([]);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [recordsError, setRecordsError] = useState<string | null>(null);
 
   // Card 01 Upload State
   const [uploadSteps, setUploadSteps] = useState<StepItem[]>([]);
@@ -134,6 +137,7 @@ export default function PatientPage() {
   const loadData = useCallback(async () => {
     if (!publicKey) return;
     setRefreshing(true);
+    setRecordsError(null);
     try {
       // 1. Fetch patient's records
       const fetchedRecords = await listRecordsByPatient(publicKey);
@@ -149,7 +153,18 @@ export default function PatientPage() {
           createdAt: Number(r.account.createdAt) * 1000,
         };
       });
-      setRecords(parsedRecords);
+
+      // Merge with any existing records that might be locally optimistic, preserving newer ones
+      setRecords((prev) => {
+        const map = new Map<string, RecordItem>();
+        for (const item of prev) {
+          map.set(item.pda, item);
+        }
+        for (const item of parsedRecords) {
+          map.set(item.pda, item);
+        }
+        return Array.from(map.values()).sort((a, b) => b.createdAt - a.createdAt);
+      });
 
       // 2. Fetch all access grants relevant to this patient's records
       const recordPdaSet = new Set(parsedRecords.map((r) => r.pda));
@@ -183,9 +198,23 @@ export default function PatientPage() {
         }
       }
 
-      setGrants(patientGrants);
+      setGrants((prev) => {
+        const map = new Map<string, GrantItem>();
+        for (const item of prev) {
+          map.set(item.pda, item);
+        }
+        for (const item of patientGrants) {
+          map.set(item.pda, item);
+        }
+        return Array.from(map.values()).sort((a, b) => b.expiry - a.expiry);
+      });
     } catch (e: any) {
       console.warn("Failed to load patient data:", e);
+      setRecordsError(
+        e?.message?.includes("getProgramAccounts")
+          ? "Unable to fetch records via current RPC node. Please try clicking Refresh."
+          : (e?.message || "Failed to load records from Solana.")
+      );
     } finally {
       setRefreshing(false);
     }
@@ -425,6 +454,17 @@ export default function PatientPage() {
 
       const sig = await sigPromise;
 
+      const [recordPda] = getRecordPda(publicKey, recordId);
+      const newRecordItem: RecordItem = {
+        pda: recordPda.toBase58(),
+        recordId: recordId.toString(),
+        cid,
+        fileHashHex: hashHex,
+        wrappedKey,
+        createdAt: Date.now(),
+      };
+      setRecords((prev) => [newRecordItem, ...prev.filter((r) => r.pda !== newRecordItem.pda)]);
+
       setUploadTx(sig);
       setUploadSteps((prev) =>
         prev.map((s, idx) =>
@@ -436,7 +476,9 @@ export default function PatientPage() {
       setUploadSuccess(`Record #${recordId.toString()} encrypted and registered on Solana.`);
       setFile(null);
       setStagedUpload(null);
-      await loadData();
+      setTimeout(() => {
+        loadData();
+      }, 1500);
     } catch (err: any) {
       const rawMsg = err?.message || String(err);
       const plainMsg = mapProgramError(err);
@@ -497,6 +539,17 @@ export default function PatientPage() {
 
       const sig = await sigPromise;
 
+      const [recordPda] = getRecordPda(publicKey, recordId);
+      const newRecordItem: RecordItem = {
+        pda: recordPda.toBase58(),
+        recordId: recordId.toString(),
+        cid: stagedUpload.cid,
+        fileHashHex: stagedUpload.hashHex,
+        wrappedKey: stagedUpload.wrappedKey,
+        createdAt: Date.now(),
+      };
+      setRecords((prev) => [newRecordItem, ...prev.filter((r) => r.pda !== newRecordItem.pda)]);
+
       setUploadTx(sig);
       setUploadSteps((prev) =>
         prev.map((s, idx) =>
@@ -508,7 +561,9 @@ export default function PatientPage() {
       setUploadSuccess(`Record #${recordId.toString()} encrypted and registered on Solana.`);
       setFile(null);
       setStagedUpload(null);
-      await loadData();
+      setTimeout(() => {
+        loadData();
+      }, 1500);
     } catch (err: any) {
       const rawMsg = err?.message || String(err);
       const plainMsg = mapProgramError(err);
@@ -765,6 +820,18 @@ export default function PatientPage() {
 
       const sig = await sigPromise;
 
+      const [accPda] = getAccessPda(recordPubkey, doctorPubkey);
+      const newGrant: GrantItem = {
+        pda: accPda.toBase58(),
+        recordPda: record.pda,
+        recordIdDisplay: record.recordId,
+        doctor: doctorPubkey.toBase58(),
+        expiry: (Math.floor(Date.now() / 1000) + durationSecs) * 1000,
+        revoked: false,
+        status: "active",
+      };
+      setGrants((prev) => [newGrant, ...prev.filter((g) => g.pda !== newGrant.pda)]);
+
       setShareStatus((prev) => ({
         ...prev,
         [record.pda]: {
@@ -781,7 +848,9 @@ export default function PatientPage() {
         },
       }));
 
-      await loadData();
+      setTimeout(() => {
+        loadData();
+      }, 1500);
     } catch (err: any) {
       const msg = mapProgramError(err);
       setShareStatus((prev) => ({
@@ -810,8 +879,13 @@ export default function PatientPage() {
         new PublicKey(grant.doctor)
       );
 
+      setGrants((prev) =>
+        prev.map((g) => (g.pda === grant.pda ? { ...g, revoked: true, status: "revoked" } : g))
+      );
       setConfirmStopGrant(null);
-      await loadData();
+      setTimeout(() => {
+        loadData();
+      }, 1500);
     } catch (err: any) {
       console.error("Failed to revoke access:", err);
     } finally {
@@ -1051,6 +1125,15 @@ export default function PatientPage() {
             Refresh
           </GlassButton>
         </div>
+
+        {recordsError && (
+          <div className="p-3.5 mb-3 rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] text-xs text-[#b42318] flex items-center justify-between gap-3">
+            <span>{recordsError}</span>
+            <GlassButton variant="secondary" size="sm" onClick={loadData}>
+              Retry
+            </GlassButton>
+          </div>
+        )}
 
         {records.length === 0 ? (
           <EmptyStateBox

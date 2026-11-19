@@ -107,6 +107,11 @@ export default function PublisherPage() {
       );
     } catch (e: any) {
       console.warn("Error loading publisher data:", e);
+      setRegistryError(
+        e?.message?.includes("getProgramAccounts")
+          ? "Unable to fetch credentials via current RPC node. Please try clicking Refresh."
+          : (e?.message || "Failed to load credentials from Solana.")
+      );
     } finally {
       setRefreshing(false);
     }

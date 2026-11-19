@@ -69,6 +69,7 @@ export default function DoctorPage() {
   const [nowTime, setNowTime] = useState<number | null>(null);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [activating, setActivating] = useState(false);
 
@@ -91,6 +92,7 @@ export default function DoctorPage() {
   const loadData = useCallback(async () => {
     if (!publicKey) return;
     setRefreshing(true);
+    setLoadError(null);
     try {
       const accessList = await listAccessForDoctor(publicKey);
       const recordsData: DoctorSharedRecord[] = [];
@@ -118,6 +120,11 @@ export default function DoctorPage() {
       setSharedRecords(recordsData);
     } catch (e: any) {
       console.warn("Failed to load doctor portal data:", e);
+      setLoadError(
+        e?.message?.includes("getProgramAccounts")
+          ? "Unable to fetch records via current RPC node. Please try clicking Refresh."
+          : (e?.message || "Failed to load shared records.")
+      );
     } finally {
       setRefreshing(false);
     }
@@ -493,6 +500,15 @@ export default function DoctorPage() {
         title="Records Shared With You"
         description="View records you have been granted permission to access, verify access on-chain, and decrypt."
       >
+        {loadError && (
+          <div className="p-3.5 mb-3 rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] text-xs text-[#b42318] flex items-center justify-between gap-3">
+            <span>{loadError}</span>
+            <GlassButton variant="secondary" size="sm" onClick={loadData}>
+              Retry
+            </GlassButton>
+          </div>
+        )}
+
         {refreshing ? (
           <div className="py-8 text-center text-xs font-mono text-[#6b7280]">
             Checking shared records...

@@ -45,15 +45,12 @@ export interface RoleContextType {
   refreshProgramDeployed: () => Promise<boolean>;
 }
 
-export const CLUSTER = process.env.NEXT_PUBLIC_CLUSTER || "local";
-export const LOCALNET_RPC_URL =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
-  (CLUSTER === "devnet"
-    ? "https://api.devnet.solana.com"
-    : "http://127.0.0.1:8899");
+import { RPC_URL, CLUSTER } from "./config.ts";
+
+export { CLUSTER, RPC_URL as LOCALNET_RPC_URL };
 
 export function getSolanaConnection(): Connection {
-  return new Connection(LOCALNET_RPC_URL, {
+  return new Connection(RPC_URL, {
     commitment: "confirmed",
     confirmTransactionInitialTimeout: 90000,
   });

@@ -12,7 +12,7 @@ import nacl from "tweetnacl";
 import solhealthIdl from "./idl/solhealth.json" with { type: "json" };
 import type { Solhealth } from "./types/solhealth.ts";
 import { getSolanaConnection, LOCALNET_RPC_URL } from "./roles.ts";
-import { PROGRAM_ID as CONFIG_PROGRAM_ID, withRpcRetry } from "./config.ts";
+import { PROGRAM_ID as CONFIG_PROGRAM_ID, withRpcRetry, CLUSTER } from "./config.ts";
 
 export { LOCALNET_RPC_URL, getSolanaConnection };
 
@@ -639,35 +639,75 @@ export async function getAccess(
   }, "fetch access grant");
 }
 
+/**
+ * Execute a read-only Anchor program query with automatic fallback to public Devnet RPC
+ * if the primary RPC provider rejects getProgramAccounts (e.g. Alchemy Free Tier returning error -32600).
+ */
+async function withProgramAccountsFallback<T>(
+  queryFn: (prog: Program<Solhealth>) => Promise<T>,
+  primaryConnection?: Connection
+): Promise<T> {
+  const primaryConn = primaryConnection || getSolanaConnection();
+  const primaryProgram = getReadOnlyProgram(primaryConn);
+
+  try {
+    return await queryFn(primaryProgram);
+  } catch (err: any) {
+    const errString = err?.message || String(err);
+    const isUnsupported =
+      errString.includes("getProgramAccounts is not available") ||
+      errString.includes("-32600") ||
+      errString.includes("Method not found") ||
+      errString.includes("is not available on the Free tier");
+
+    if (isUnsupported && CLUSTER === "devnet") {
+      const fallbackUrl = "https://api.devnet.solana.com";
+      if (primaryConn.rpcEndpoint !== fallbackUrl) {
+        console.warn(
+          `Primary RPC (${primaryConn.rpcEndpoint}) does not support getProgramAccounts. Falling back to public Devnet RPC (${fallbackUrl})...`
+        );
+        const fallbackConn = new Connection(fallbackUrl, {
+          commitment: "confirmed",
+          confirmTransactionInitialTimeout: 90000,
+        });
+        const fallbackProgram = getReadOnlyProgram(fallbackConn);
+        return await queryFn(fallbackProgram);
+      }
+    }
+    throw err;
+  }
+}
+
 export async function listRecordsByPatient(
   patientPubkey: PublicKey,
   connection?: Connection
 ) {
-  const program = getReadOnlyProgram(connection);
   return withRpcRetry(async () => {
-    try {
-      const all = await program.account.record.all([
-        {
-          memcmp: {
-            offset: 8, // after discriminator
-            bytes: patientPubkey.toBase58(),
+    return withProgramAccountsFallback(async (program) => {
+      try {
+        const all = await program.account.record.all([
+          {
+            memcmp: {
+              offset: 8, // after discriminator
+              bytes: patientPubkey.toBase58(),
+            },
           },
-        },
-      ]);
-      return all.map((a) => ({
-        publicKey: a.publicKey,
-        account: a.account,
-      }));
-    } catch (err) {
-      console.warn("Memcmp query failed, falling back to all:", err);
-      const all = await program.account.record.all();
-      return all
-        .filter((a) => a.account.patient.toBase58() === patientPubkey.toBase58())
-        .map((a) => ({
+        ]);
+        return all.map((a) => ({
           publicKey: a.publicKey,
           account: a.account,
         }));
-    }
+      } catch (err) {
+        console.warn("Memcmp query failed, falling back to all:", err);
+        const all = await program.account.record.all();
+        return all
+          .filter((a) => a.account.patient.toBase58() === patientPubkey.toBase58())
+          .map((a) => ({
+            publicKey: a.publicKey,
+            account: a.account,
+          }));
+      }
+    }, connection);
   }, "list patient records");
 }
 
@@ -675,62 +715,65 @@ export async function listAccessForDoctor(
   doctorPubkey: PublicKey,
   connection?: Connection
 ) {
-  const program = getReadOnlyProgram(connection);
   return withRpcRetry(async () => {
-    try {
-      const all = await program.account.access.all([
-        {
-          memcmp: {
-            offset: 8 + 32, // discriminator + record pubkey
-            bytes: doctorPubkey.toBase58(),
+    return withProgramAccountsFallback(async (program) => {
+      try {
+        const all = await program.account.access.all([
+          {
+            memcmp: {
+              offset: 8 + 32, // discriminator + record pubkey
+              bytes: doctorPubkey.toBase58(),
+            },
           },
-        },
-      ]);
-      return all.map((a) => ({
-        publicKey: a.publicKey,
-        account: a.account,
-      }));
-    } catch (err) {
-      console.warn("Memcmp query failed, falling back to all:", err);
-      const all = await program.account.access.all();
-      return all
-        .filter((a) => a.account.doctor.toBase58() === doctorPubkey.toBase58())
-        .map((a) => ({
+        ]);
+        return all.map((a) => ({
           publicKey: a.publicKey,
           account: a.account,
         }));
-    }
+      } catch (err) {
+        console.warn("Memcmp query failed, falling back to all:", err);
+        const all = await program.account.access.all();
+        return all
+          .filter((a) => a.account.doctor.toBase58() === doctorPubkey.toBase58())
+          .map((a) => ({
+            publicKey: a.publicKey,
+            account: a.account,
+          }));
+      }
+    }, connection);
   }, "list doctor access grants");
 }
 
 export async function listCredentials(connection?: Connection) {
-  const program = getReadOnlyProgram(connection);
   return withRpcRetry(async () => {
-    try {
-      const all = await program.account.credential.all();
-      return all.map((a) => ({
-        publicKey: a.publicKey,
-        account: a.account,
-      }));
-    } catch (err) {
-      console.warn("Failed to fetch credentials:", err);
-      return [];
-    }
+    return withProgramAccountsFallback(async (program) => {
+      try {
+        const all = await program.account.credential.all();
+        return all.map((a) => ({
+          publicKey: a.publicKey,
+          account: a.account,
+        }));
+      } catch (err) {
+        console.warn("Failed to fetch credentials:", err);
+        return [];
+      }
+    }, connection);
   }, "list credentials");
 }
 
 export async function listAllAccess(connection?: Connection) {
-  const program = getReadOnlyProgram(connection);
   return withRpcRetry(async () => {
-    try {
-      const all = await program.account.access.all();
-      return all.map((a) => ({
-        publicKey: a.publicKey,
-        account: a.account,
-      }));
-    } catch (err) {
-      console.warn("Failed to fetch all access:", err);
-      return [];
-    }
+    return withProgramAccountsFallback(async (program) => {
+      try {
+        const all = await program.account.access.all();
+        return all.map((a) => ({
+          publicKey: a.publicKey,
+          account: a.account,
+        }));
+      } catch (err) {
+        console.warn("Failed to fetch all access:", err);
+        return [];
+      }
+    }, connection);
   }, "list all access grants");
 }
