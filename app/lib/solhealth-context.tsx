@@ -288,7 +288,10 @@ export function SolhealthProvider({ children }: { children: React.ReactNode }) {
 
   // Balance and RPC connection check
   const refreshBalancesAndHealth = useCallback(async () => {
-    const conn = new Connection(RPC_URL, "confirmed");
+    const conn = new Connection(RPC_URL, {
+      commitment: "confirmed",
+      confirmTransactionInitialTimeout: 90000,
+    });
     try {
       const v = await conn.getVersion();
       setRpcOnline(!!v);
@@ -318,7 +321,10 @@ export function SolhealthProvider({ children }: { children: React.ReactNode }) {
   }, [effectivePubkey]);
 
   const refreshProgramDeployed = useCallback(async () => {
-    const conn = new Connection(RPC_URL, "confirmed");
+    const conn = new Connection(RPC_URL, {
+      commitment: "confirmed",
+      confirmTransactionInitialTimeout: 90000,
+    });
     try {
       const isDep = await checkProgramDeployed(conn);
       setProgramDeployed(isDep);
@@ -352,7 +358,10 @@ export function SolhealthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setRolesLoading(true);
-    const conn = new Connection(RPC_URL, "confirmed");
+    const conn = new Connection(RPC_URL, {
+      commitment: "confirmed",
+      confirmTransactionInitialTimeout: 90000,
+    });
     try {
       // 1. Fetch Config PDA
       const config = await getConfig(conn);
@@ -448,7 +457,10 @@ export function SolhealthProvider({ children }: { children: React.ReactNode }) {
         derivedKeypair = await deriveEncryptionKeypair(signature);
       }
 
-      const conn = new Connection(RPC_URL, "confirmed");
+      const conn = new Connection(RPC_URL, {
+      commitment: "confirmed",
+      confirmTransactionInitialTimeout: 90000,
+    });
       const onChain = await getEncryptionKey(signer.publicKey, conn);
 
       if (!onChain) {
@@ -507,7 +519,10 @@ export function SolhealthProvider({ children }: { children: React.ReactNode }) {
 
     setAirdropLoading(true);
     setAirdropRateLimited(false);
-    const conn = new Connection(RPC_URL, "confirmed");
+    const conn = new Connection(RPC_URL, {
+      commitment: "confirmed",
+      confirmTransactionInitialTimeout: 90000,
+    });
 
     try {
       const amountLamports =

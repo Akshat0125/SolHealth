@@ -255,6 +255,17 @@ export function mapProgramError(error: unknown): string {
     return "You cancelled the request in your wallet.";
   }
 
+  if (
+    errString.includes("Transaction was not confirmed in") ||
+    errString.includes("TransactionExpiredTimeoutError")
+  ) {
+    const sig = errString.match(/Check signature ([1-9A-HJ-NP-Za-km-z]+)/)?.[1];
+    if (sig) {
+      return `Transaction confirmation timed out. Check signature ${sig} on Solana Explorer.`;
+    }
+    return "Transaction confirmation timed out. The Solana network may be congested; please check your wallet or Explorer.";
+  }
+
   // Remove noise such as "Catch the SendTransactionError and call getLogs()"
   errString = errString
     .replace(/Catch the SendTransactionError and call getLogs\(\)[^.]*\.?/gi, "")
@@ -269,6 +280,75 @@ export function mapProgramError(error: unknown): string {
 // Uses AnchorProvider built from SolhealthSigner; NO .signers([keypair]) calls.
 // -----------------------------------------------------------------------------
 
+/**
+ * Executes an Anchor method with resilient confirmation polling.
+ *
+ * Solana public Devnet RPC WebSockets frequently drop or delay `onSignature` events,
+ * causing web3.js `confirmTransaction` to throw `TransactionExpiredTimeoutError` after 30s
+ * even when the transaction successfully lands and finalizes on-chain.
+ *
+ * This wrapper intercepts timeout errors, extracts the broadcast transaction signature,
+ * and polls `getSignatureStatus` via HTTP to verify the actual on-chain result.
+ */
+async function executeAnchorMethod(
+  methodBuilder: any,
+  conn: Connection
+): Promise<string> {
+  try {
+    return await methodBuilder.rpc();
+  } catch (err: any) {
+    const errMessage = err?.message || String(err);
+    const sig: string | undefined =
+      err?.signature ||
+      errMessage.match(/Check signature ([1-9A-HJ-NP-Za-km-z]+)/)?.[1];
+
+    const isTimeout =
+      err?.name === "TransactionExpiredTimeoutError" ||
+      errMessage.includes("Transaction was not confirmed in") ||
+      errMessage.includes("has expired: block height exceeded");
+
+    if (sig && isTimeout) {
+      // Poll getSignatureStatus via HTTP to verify whether the transaction confirmed
+      const pollStart = Date.now();
+      const maxPollMs = 60000; // poll for up to 60 seconds
+      while (Date.now() - pollStart < maxPollMs) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        try {
+          const statusRes = await conn.getSignatureStatus(sig, {
+            searchTransactionHistory: true,
+          });
+          const status = statusRes?.value;
+          if (status) {
+            if (status.err) {
+              throw new Error(mapProgramError(status.err));
+            }
+            if (
+              status.confirmationStatus === "confirmed" ||
+              status.confirmationStatus === "finalized"
+            ) {
+              return sig;
+            }
+          }
+        } catch (pollErr: any) {
+          if (
+            pollErr?.message &&
+            !pollErr.message.includes("failed to get signature status") &&
+            !pollErr.message.includes("429")
+          ) {
+            throw pollErr;
+          }
+        }
+      }
+
+      throw new Error(
+        `Transaction confirmation timed out on Solana Devnet. The transaction was broadcast with signature ${sig}. Please check Solana Explorer: https://explorer.solana.com/tx/${sig}?cluster=devnet`
+      );
+    }
+
+    throw new Error(mapProgramError(err));
+  }
+}
+
 export async function registerEncryptionKey(
   signer: SolhealthSignerOrKeypair,
   x25519Pubkey: Uint8Array | number[],
@@ -276,7 +356,8 @@ export async function registerEncryptionKey(
   connection?: Connection
 ): Promise<string> {
   const s = ensureSigner(signer);
-  const program = getProgram(s, connection);
+  const conn = connection || getSolanaConnection();
+  const program = getProgram(s, conn);
   const [encPda] = getEncryptionKeyPda(s.publicKey, program.programId);
   const keyArr =
     x25519Pubkey instanceof Uint8Array ? Array.from(x25519Pubkey) : x25519Pubkey;
@@ -284,19 +365,15 @@ export async function registerEncryptionKey(
     throw new Error("x25519Pubkey must be exactly 32 bytes");
   }
 
-  try {
-    const tx = await program.methods
-      .registerEncryptionKey(keyArr as unknown as number[], version)
-      .accounts({
-        encryptionKey: encPda,
-        owner: s.publicKey,
-        systemProgram: SystemProgram.programId,
-      } as any)
-      .rpc();
-    return tx;
-  } catch (err) {
-    throw new Error(mapProgramError(err));
-  }
+  const method = program.methods
+    .registerEncryptionKey(keyArr as unknown as number[], version)
+    .accounts({
+      encryptionKey: encPda,
+      owner: s.publicKey,
+      systemProgram: SystemProgram.programId,
+    } as any);
+
+  return executeAnchorMethod(method, conn);
 }
 
 export async function initConfig(
@@ -304,22 +381,19 @@ export async function initConfig(
   connection?: Connection
 ): Promise<string> {
   const s = ensureSigner(signer);
-  const program = getProgram(s, connection);
+  const conn = connection || getSolanaConnection();
+  const program = getProgram(s, conn);
   const [configPda] = getConfigPda(program.programId);
 
-  try {
-    const tx = await program.methods
-      .initializeConfig()
-      .accounts({
-        config: configPda,
-        authority: s.publicKey,
-        systemProgram: SystemProgram.programId,
-      } as any)
-      .rpc();
-    return tx;
-  } catch (err) {
-    throw new Error(mapProgramError(err));
-  }
+  const method = program.methods
+    .initializeConfig()
+    .accounts({
+      config: configPda,
+      authority: s.publicKey,
+      systemProgram: SystemProgram.programId,
+    } as any);
+
+  return executeAnchorMethod(method, conn);
 }
 
 export async function issueCredential(
@@ -328,24 +402,21 @@ export async function issueCredential(
   connection?: Connection
 ): Promise<string> {
   const s = ensureSigner(signer);
-  const program = getProgram(s, connection);
+  const conn = connection || getSolanaConnection();
+  const program = getProgram(s, conn);
   const [configPda] = getConfigPda(program.programId);
   const [credPda] = getCredentialPda(doctorPubkey, program.programId);
 
-  try {
-    const tx = await program.methods
-      .issueCredential(doctorPubkey)
-      .accounts({
-        config: configPda,
-        credential: credPda,
-        authority: s.publicKey,
-        systemProgram: SystemProgram.programId,
-      } as any)
-      .rpc();
-    return tx;
-  } catch (err) {
-    throw new Error(mapProgramError(err));
-  }
+  const method = program.methods
+    .issueCredential(doctorPubkey)
+    .accounts({
+      config: configPda,
+      credential: credPda,
+      authority: s.publicKey,
+      systemProgram: SystemProgram.programId,
+    } as any);
+
+  return executeAnchorMethod(method, conn);
 }
 
 export async function revokeCredential(
@@ -354,23 +425,20 @@ export async function revokeCredential(
   connection?: Connection
 ): Promise<string> {
   const s = ensureSigner(signer);
-  const program = getProgram(s, connection);
+  const conn = connection || getSolanaConnection();
+  const program = getProgram(s, conn);
   const [configPda] = getConfigPda(program.programId);
   const [credPda] = getCredentialPda(doctorPubkey, program.programId);
 
-  try {
-    const tx = await program.methods
-      .revokeCredential()
-      .accounts({
-        config: configPda,
-        credential: credPda,
-        authority: s.publicKey,
-      } as any)
-      .rpc();
-    return tx;
-  } catch (err) {
-    throw new Error(mapProgramError(err));
-  }
+  const method = program.methods
+    .revokeCredential()
+    .accounts({
+      config: configPda,
+      credential: credPda,
+      authority: s.publicKey,
+    } as any);
+
+  return executeAnchorMethod(method, conn);
 }
 
 export async function registerRecord(
@@ -382,7 +450,8 @@ export async function registerRecord(
   connection?: Connection
 ): Promise<string> {
   const s = ensureSigner(signer);
-  const program = getProgram(s, connection);
+  const conn = connection || getSolanaConnection();
+  const program = getProgram(s, conn);
   const bnRecordId = new BN(recordId.toString());
   const [recPda] = getRecordPda(
     s.publicKey,
@@ -396,24 +465,20 @@ export async function registerRecord(
     throw new Error("fileHash must be exactly 32 bytes");
   }
 
-  try {
-    const tx = await program.methods
-      .registerRecord(
-        bnRecordId,
-        cid,
-        hashArray as unknown as number[],
-        Buffer.from(wrappedKey)
-      )
-      .accounts({
-        record: recPda,
-        patient: s.publicKey,
-        systemProgram: SystemProgram.programId,
-      } as any)
-      .rpc();
-    return tx;
-  } catch (err) {
-    throw new Error(mapProgramError(err));
-  }
+  const method = program.methods
+    .registerRecord(
+      bnRecordId,
+      cid,
+      hashArray as unknown as number[],
+      Buffer.from(wrappedKey)
+    )
+    .accounts({
+      record: recPda,
+      patient: s.publicKey,
+      systemProgram: SystemProgram.programId,
+    } as any);
+
+  return executeAnchorMethod(method, conn);
 }
 
 export async function grantAccess(
@@ -425,26 +490,23 @@ export async function grantAccess(
   connection?: Connection
 ): Promise<string> {
   const s = ensureSigner(signer);
-  const program = getProgram(s, connection);
+  const conn = connection || getSolanaConnection();
+  const program = getProgram(s, conn);
   const [credPda] = getCredentialPda(doctorPubkey, program.programId);
   const [accPda] = getAccessPda(recordPda, doctorPubkey, program.programId);
   const bnDuration = new BN(durationSecs.toString());
 
-  try {
-    const tx = await program.methods
-      .grantAccess(doctorPubkey, bnDuration, Buffer.from(wrappedKey))
-      .accounts({
-        record: recordPda,
-        credential: credPda,
-        access: accPda,
-        patient: s.publicKey,
-        systemProgram: SystemProgram.programId,
-      } as any)
-      .rpc();
-    return tx;
-  } catch (err) {
-    throw new Error(mapProgramError(err));
-  }
+  const method = program.methods
+    .grantAccess(doctorPubkey, bnDuration, Buffer.from(wrappedKey))
+    .accounts({
+      record: recordPda,
+      credential: credPda,
+      access: accPda,
+      patient: s.publicKey,
+      systemProgram: SystemProgram.programId,
+    } as any);
+
+  return executeAnchorMethod(method, conn);
 }
 
 export async function revokeAccess(
@@ -454,22 +516,19 @@ export async function revokeAccess(
   connection?: Connection
 ): Promise<string> {
   const s = ensureSigner(signer);
-  const program = getProgram(s, connection);
+  const conn = connection || getSolanaConnection();
+  const program = getProgram(s, conn);
   const [accPda] = getAccessPda(recordPda, doctorPubkey, program.programId);
 
-  try {
-    const tx = await program.methods
-      .revokeAccess()
-      .accounts({
-        record: recordPda,
-        access: accPda,
-        patient: s.publicKey,
-      } as any)
-      .rpc();
-    return tx;
-  } catch (err) {
-    throw new Error(mapProgramError(err));
-  }
+  const method = program.methods
+    .revokeAccess()
+    .accounts({
+      record: recordPda,
+      access: accPda,
+      patient: s.publicKey,
+    } as any);
+
+  return executeAnchorMethod(method, conn);
 }
 
 export async function accessRecord(
@@ -478,7 +537,8 @@ export async function accessRecord(
   connection?: Connection
 ): Promise<string> {
   const s = ensureSigner(signer);
-  const program = getProgram(s, connection);
+  const conn = connection || getSolanaConnection();
+  const program = getProgram(s, conn);
   const [credPda] = getCredentialPda(
     s.publicKey,
     program.programId
@@ -489,20 +549,16 @@ export async function accessRecord(
     program.programId
   );
 
-  try {
-    const tx = await program.methods
-      .accessRecord()
-      .accounts({
-        record: recordPda,
-        credential: credPda,
-        access: accPda,
-        doctor: s.publicKey,
-      } as any)
-      .rpc();
-    return tx;
-  } catch (err) {
-    throw new Error(mapProgramError(err));
-  }
+  const method = program.methods
+    .accessRecord()
+    .accounts({
+      record: recordPda,
+      credential: credPda,
+      access: accPda,
+      doctor: s.publicKey,
+    } as any);
+
+  return executeAnchorMethod(method, conn);
 }
 
 // -----------------------------------------------------------------------------

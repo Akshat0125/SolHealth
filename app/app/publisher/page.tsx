@@ -329,8 +329,9 @@ export default function PublisherPage() {
           </div>
           <p className="text-sm text-[#1b1f2a] leading-relaxed">
             Only the registry authority can verify doctors or manage credentials. This registry was initialized by authority{" "}
-            <span className="font-mono font-bold text-xs bg-white px-2 py-0.5 rounded-md border border-[rgba(27,31,42,0.08)]">
-              {configState?.authority}
+            <span className="font-mono font-bold text-xs bg-white px-2 py-0.5 rounded-md border border-[rgba(27,31,42,0.08)] break-all inline">
+              <span className="sm:hidden">{configState?.authority ? formatShortAddress(configState.authority, 6) : ""}</span>
+              <span className="hidden sm:inline">{configState?.authority}</span>
             </span>
             . To manage doctors, connect using that wallet address.
           </p>

@@ -53,7 +53,10 @@ export const LOCALNET_RPC_URL =
     : "http://127.0.0.1:8899");
 
 export function getSolanaConnection(): Connection {
-  return new Connection(LOCALNET_RPC_URL, "confirmed");
+  return new Connection(LOCALNET_RPC_URL, {
+    commitment: "confirmed",
+    confirmTransactionInitialTimeout: 90000,
+  });
 }
 
 export function loadOrCreateKeypair(role: Role): Keypair {
