@@ -1,5 +1,7 @@
 # SolHealth
 
+> 🌐 **Live Application**: [https://sol-health-two.vercel.app/](https://sol-health-two.vercel.app/)
+
 SolHealth is a patient-controlled decentralized medical records protocol built on Solana with client-side encryption and IPFS storage. Patients encrypt sensitive medical documents locally in the browser using AES-256-GCM and wrap encryption keys with TweetNaCl Box for authorized recipients. Encrypted ciphertexts are pinned to IPFS while document hashes, IPFS content identifiers (CIDs), and time-bounded access delegations are enforced on-chain via Solana Program Derived Addresses (PDAs). Every state transition—from credential issuance to access grant and revocation—emits immutable on-chain events for verification and auditing.
 
 ## Architecture
@@ -113,7 +115,7 @@ The following items are design goals for future iterations and are not claimed a
    cd app
    npm run dev
    ```
-   Access the application interface at `http://localhost:3000`.
+   Access the application interface at `http://localhost:3000` or visit the live deployment at [https://sol-health-two.vercel.app/](https://sol-health-two.vercel.app/).
 
 ## How to Run Tests
 

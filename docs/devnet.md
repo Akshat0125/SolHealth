@@ -11,7 +11,8 @@ The SolHealth Anchor smart contract is deployed to Solana Devnet.
 - **Program Size**: 229,024 bytes
 - **Program Keypair File**: `target/deploy/solhealth-keypair.json` (Important: back up this file privately and securely offline; never commit keypairs or secrets to version control)
 
-## Solana Explorer Links
+## Solana Explorer & Live Links
+- **Live Application**: [https://sol-health-two.vercel.app/](https://sol-health-two.vercel.app/)
 - **Program Account**: [https://explorer.solana.com/address/52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq?cluster=devnet](https://explorer.solana.com/address/52sv1bDkPFyi8mwVG2eYLYPXPmr6n1oTBmmDLsjC9Hhq?cluster=devnet)
 - **Deployment Transaction**: [https://explorer.solana.com/tx/TYTJVzZ6cpx4rPSBFc3gUqUHbYkCmHLZshfhHHXL4MEdKyTxx6vz1nrEtvMxTm15xSS1wWiVxgHbkZgQ2koQaUs?cluster=devnet](https://explorer.solana.com/tx/TYTJVzZ6cpx4rPSBFc3gUqUHbYkCmHLZshfhHHXL4MEdKyTxx6vz1nrEtvMxTm15xSS1wWiVxgHbkZgQ2koQaUs?cluster=devnet)
 
