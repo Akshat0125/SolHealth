@@ -525,3 +525,106 @@ body {
     border-color: rgba(249, 201, 51, 0.85) !important;
   }
 }
+
+/* ======================================================== */
+/* GUIDE BOT SCOPED STYLES (.guide-)                        */
+/* ======================================================== */
+.guide-launcher {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(249, 201, 51, 0.6);
+  color: #1b1f2a;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: 13.5px;
+  box-shadow: 0 8px 24px rgba(27, 31, 42, 0.12);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: all 180ms ease;
+}
+
+.guide-launcher:hover {
+  background: #fff9e6;
+  border-color: #f9c933;
+  box-shadow: 0 10px 28px rgba(249, 201, 51, 0.28);
+  transform: translateY(-1px);
+}
+
+.guide-launcher:active {
+  transform: translateY(1px);
+}
+
+.guide-launcher:focus-visible {
+  outline: 3px solid rgba(249, 201, 51, 0.6);
+  outline-offset: 2px;
+}
+
+.guide-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #17803d;
+  box-shadow: 0 0 6px rgba(23, 128, 61, 0.5);
+}
+
+.guide-panel-container {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(27, 31, 42, 0.12);
+  box-shadow: 0 20px 48px rgba(27, 31, 42, 0.16);
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .guide-panel-container {
+    bottom: 76px;
+    right: 20px;
+    width: 420px;
+    max-width: calc(100vw - 40px);
+    height: 600px;
+    max-height: calc(100vh - 96px);
+    border-radius: 28px;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .guide-panel-container {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    height: 86vh;
+    max-height: 86vh;
+    border-radius: 28px 28px 0 0;
+  }
+}
+
+.guide-custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.guide-custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.guide-custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(27, 31, 42, 0.14);
+  border-radius: 4px;
+}
+.guide-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(27, 31, 42, 0.25);
+}
