@@ -29,6 +29,7 @@ Configure the following variables in **Project Settings > Environment Variables*
 | `NEXT_PUBLIC_ENABLE_DEMO` | `false` | Production | Disables demo simulated identities; requires real browser wallets |
 | `PINATA_JWT` | `<your-pinata-jwt>` | Server-side only | Scoped Pinata API token for IPFS ciphertext pinning |
 | `UPLOADS_ENABLED` | `true` | Production, Preview | Emergency kill-switch: set to `false` to immediately reject new uploads |
+| `NEXT_PUBLIC_ENABLE_GUIDE` | `true` (optional) | Production, Preview | Optional feature flag: set to `false` to disable the in-browser Guide Bot and omit all guide bundles |
 
 > [!IMPORTANT]
 > - **Security**: `PINATA_JWT` and `UPLOADS_ENABLED` must **NEVER** use the `NEXT_PUBLIC_` prefix. They remain strictly server-side in API routes.

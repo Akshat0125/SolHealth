@@ -94,6 +94,7 @@ The following items are design goals for future iterations and are not claimed a
    PINATA_JWT=your_pinata_jwt_here
    NEXT_PUBLIC_CLUSTER=local
    NEXT_PUBLIC_SOLANA_RPC_URL=http://127.0.0.1:8899
+   NEXT_PUBLIC_ENABLE_GUIDE=true       # Optional: set to 'false' to disable in-browser Guide Bot
    ```
 
 4. Build the Anchor smart contract:
