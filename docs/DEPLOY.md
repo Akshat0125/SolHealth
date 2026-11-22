@@ -16,6 +16,10 @@ Because SolHealth is a monorepo containing both the Anchor smart contract (`prog
    - Output Directory: `.next`
    - Install Command: `yarn install` (or `npm install`)
 
+### Known install warnings
+
+During `yarn install`, peer dependency warnings may appear for `react-native@>0.74` from `@solana-mobile/wallet-adapter-mobile` and `@react-native-async-storage/async-storage`. These originate from the optional Solana mobile wallet adapter bundled into `@solana/wallet-adapter-react`. They are expected and completely harmless for this web application; do not install React Native dependencies.
+
 ---
 
 ## 2. Environment Variables Configuration
