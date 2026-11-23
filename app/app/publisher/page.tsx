@@ -307,14 +307,14 @@ export default function PublisherPage() {
     >
       {/* Wallet Gating Card if Disconnected */}
       {mounted && !connected && (
-        <div className="p-6 rounded-[24px] bg-[#fffdf6] border border-[#f9c933]/40 shadow-xs space-y-4">
+        <div className="p-6 rounded-2xl bg-[#F7FBFC] border border-[#DCEEF2] shadow-xs space-y-4">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8a5a00]" />
-            <h3 className="font-headline font-bold text-base text-[#1b1f2a]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#00B8D9]" />
+            <h3 className="font-headline font-bold text-base text-[#040B1A]">
               Wallet Connection Required
             </h3>
           </div>
-          <p className="text-sm text-[#6b7280] leading-relaxed">
+          <p className="text-sm text-[#64748B] leading-relaxed">
             Publisher operations require signing on-chain transactions as the registry authority. Please connect your Solana wallet.
           </p>
           <GlassButton variant="primary" onClick={openWalletModal}>
@@ -325,16 +325,16 @@ export default function PublisherPage() {
 
       {/* Gating if registry is set up by a different wallet */}
       {mounted && connected && isConfigByOther && (
-        <div className="p-6 rounded-[24px] bg-[#fde8e6] border border-[#fbd0cb] shadow-xs space-y-3">
+        <div className="p-6 rounded-2xl bg-[#FEE2E2] border border-[#FCA5A5] shadow-xs space-y-3">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#b42318]" />
-            <h3 className="font-headline font-bold text-base text-[#b42318]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#991B1B]" />
+            <h3 className="font-headline font-bold text-base text-[#991B1B]">
               Authority Access Restricted
             </h3>
           </div>
-          <p className="text-sm text-[#1b1f2a] leading-relaxed">
+          <p className="text-sm text-[#040B1A] leading-relaxed">
             Only the registry authority can verify doctors or manage credentials. This registry was initialized by authority{" "}
-            <span className="font-mono font-bold text-xs bg-white px-2 py-0.5 rounded-md border border-[rgba(27,31,42,0.08)] break-all inline">
+            <span className="font-mono font-bold text-xs bg-white px-2 py-0.5 rounded-md border border-[#DCEEF2] break-all inline">
               <span className="sm:hidden">{configState?.authority ? formatShortAddress(configState.authority, 6) : ""}</span>
               <span className="hidden sm:inline">{configState?.authority}</span>
             </span>
@@ -363,7 +363,7 @@ export default function PublisherPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-4 sm:gap-6">
             <div className="space-y-1">
-              <div className="text-xs font-headline font-semibold text-[#6b7280]">
+              <div className="text-xs font-headline font-semibold text-[#64748B]">
                 Registry Status
               </div>
               <div className="flex items-center gap-2">
@@ -396,14 +396,14 @@ export default function PublisherPage() {
 
           {/* Warning when not set up */}
           {isConfigMissing && (
-            <div className="p-3.5 rounded-[16px] bg-[#fff8d6] border border-[#fde293] text-xs text-[#8a5a00] font-medium leading-relaxed">
+            <div className="p-3.5 rounded-xl bg-[#FFF8E6] border border-[#FDE293] text-xs text-[#92400E] font-medium leading-relaxed">
               The wallet that sets up the registry becomes the Publisher. Use your Publisher account.
             </div>
           )}
 
           {/* Low balance hint */}
           {lowBalance && isConfigMissing && (
-            <p className="text-xs text-[#b42318]">
+            <p className="text-xs text-[#991B1B]">
               Your wallet balance is low ({balance.toFixed(4)} SOL). Setting up the registry requires ~0.01 SOL for rent exemption and fees.
             </p>
           )}
@@ -431,7 +431,7 @@ export default function PublisherPage() {
           <div className="space-y-2">
             <label
               htmlFor="doctor-pubkey"
-              className="block font-headline font-semibold text-xs text-[#1b1f2a]"
+              className="block font-headline font-semibold text-xs text-[#040B1A]"
             >
               Doctor Solana Wallet Address
             </label>
@@ -443,7 +443,7 @@ export default function PublisherPage() {
                 onChange={(e) => setDoctorInput(e.target.value)}
                 placeholder="Paste doctor's base58 public key..."
                 disabled={!isConfigByMe}
-                className="flex-1 px-4 py-2.5 rounded-[16px] bg-white border border-[rgba(27,31,42,0.12)] text-xs font-mono text-[#1b1f2a] placeholder:text-[#9ca3af] focus:outline-hidden focus:border-[#f9c933] disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 rounded-xl bg-white border border-[#DCEEF2] text-xs font-mono text-[#040B1A] placeholder:text-[#94A3B8] focus:outline-hidden focus:border-[#00B8D9] disabled:opacity-50"
               />
               <GlassButton
                 variant="primary"
@@ -460,12 +460,12 @@ export default function PublisherPage() {
           {/* Helper when demo mode active */}
           {demoEnabled && useDemo && demoKeypairs && isConfigByMe && (
             <div className="flex items-center gap-2 pt-1">
-              <span className="text-xs text-[#6b7280]">Demo Doctor:</span>
+              <span className="text-xs text-[#64748B]">Demo Doctor:</span>
               <button
                 type="button"
                 data-ui="btn"
                 onClick={() => setDoctorInput(demoKeypairs.doctor.publicKey.toBase58())}
-                className="text-xs font-mono font-medium text-[#8a5a00] hover:underline bg-[#fff9e6] px-2 py-0.5 rounded-md"
+                className="text-xs font-mono font-medium text-[#075985] hover:underline bg-[#E8F7FC] px-2 py-0.5 rounded-md"
               >
                 Paste Demo Doctor
               </button>
@@ -491,7 +491,7 @@ export default function PublisherPage() {
         }
       >
         {refreshing ? (
-          <div className="py-8 text-center text-xs font-mono text-[#6b7280]">
+          <div className="py-8 text-center text-xs font-mono text-[#64748B]">
             Loading credentials...
           </div>
         ) : credentials.length === 0 ? (
@@ -501,19 +501,19 @@ export default function PublisherPage() {
             {credentials.map((cred) => (
               <div
                 key={cred.publicKey.toBase58()}
-                className="p-4 rounded-[20px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-4 sm:gap-6"
+                className="p-4 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-4 sm:gap-6"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 font-mono text-xs">
-                    <span className="font-bold text-[#1b1f2a]">Doctor:</span>
-                    <span className="text-[#6b7280]">{formatShortAddress(cred.doctor, 6)}</span>
+                    <span className="font-bold text-[#040B1A]">Doctor:</span>
+                    <span className="text-[#64748B]">{formatShortAddress(cred.doctor, 6)}</span>
                     {cred.active ? (
                       <span className="status-pill status-pill-ok">Active</span>
                     ) : (
                       <span className="status-pill status-pill-danger">Revoked</span>
                     )}
                   </div>
-                  <div className="text-[11px] font-mono text-[#6b7280]">
+                  <div className="text-[11px] font-mono text-[#64748B]">
                     Issued: {formatUtcDateTime(cred.issuedAt)}
                   </div>
                 </div>

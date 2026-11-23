@@ -189,30 +189,30 @@ export default function AuditPage() {
         description="Plain-language chronological event trail decoded from Solana on-chain transaction logs."
       >
         {/* Summary row above list */}
-        <div className="flex flex-wrap items-center gap-4 text-xs font-headline font-semibold text-[#6b7280] pb-2 border-b border-[rgba(27,31,42,0.06)]">
+        <div className="flex flex-wrap items-center gap-4 text-xs font-headline font-semibold text-[#64748B] pb-2 border-b border-[#DCEEF2]">
           <span>
-            Total events: <strong className="text-[#1b1f2a]">{counts.all}</strong>
+            Total events: <strong className="text-[#040B1A] font-bold">{counts.all}</strong>
           </span>
           <span>
-            Credentials: <strong className="text-[#1b1f2a]">{counts.credentials}</strong>
+            Credentials: <strong className="text-[#040B1A] font-bold">{counts.credentials}</strong>
           </span>
           <span>
-            Records: <strong className="text-[#1b1f2a]">{counts.records}</strong>
+            Records: <strong className="text-[#040B1A] font-bold">{counts.records}</strong>
           </span>
           <span>
-            Access: <strong className="text-[#1b1f2a]">{counts.access}</strong>
+            Access: <strong className="text-[#040B1A] font-bold">{counts.access}</strong>
           </span>
         </div>
 
         {error ? (
-          <div className="rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] p-4 text-xs text-[#b42318] space-y-1">
+          <div className="rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] p-4 text-xs text-[#991B1B] space-y-1">
             <div className="font-headline font-bold uppercase tracking-wider text-[11px]">
               Query Error
             </div>
             <p>{error}</p>
           </div>
         ) : loading && formattedEvents.length === 0 ? (
-          <div className="p-8 text-center text-xs font-headline font-semibold text-[#6b7280]">
+          <div className="p-8 text-center text-xs font-headline font-semibold text-[#64748B]">
             <span className="inline-flex items-center">
               Loading audit trail
               <span className="dot-pulse" aria-hidden="true">
@@ -231,9 +231,9 @@ export default function AuditPage() {
         ) : (
           <div className="space-y-3.5">
             {filteredEvents.map((event, idx) => {
-              let dotColor = "bg-[#17803d]";
-              if (event.status === "warn") dotColor = "bg-[#9ca3af]";
-              if (event.status === "danger") dotColor = "bg-[#b42318]";
+              let dotColor = "bg-[#14D9C4]";
+              if (event.status === "warn") dotColor = "bg-[#94A3B8]";
+              if (event.status === "danger") dotColor = "bg-[#991B1B]";
 
               const technicalItems = [
                 {
@@ -257,17 +257,17 @@ export default function AuditPage() {
               return (
                 <div
                   key={`${event.signature}-${event.eventName}-${idx}`}
-                  className="p-4 sm:p-5 rounded-[20px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] space-y-2.5"
+                  className="p-4 sm:p-5 rounded-xl bg-white border border-[#DCEEF2] space-y-2.5 shadow-xs"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                     <div className="flex items-center gap-2.5">
                       <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${dotColor}`} />
-                      <p className="font-headline font-bold text-xs sm:text-sm text-[#1b1f2a]">
+                      <p className="font-headline font-bold text-xs sm:text-sm text-[#040B1A]">
                         {event.sentence}
                       </p>
                     </div>
 
-                    <div className="font-mono text-xs text-[#6b7280] shrink-0">
+                    <div className="font-mono text-xs text-[#64748B] shrink-0">
                       {event.utcTime}
                     </div>
                   </div>

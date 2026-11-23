@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { formatShortAddress } from "@/lib/format";
 import { StepRow } from "@/components/StepRow";
+import { ExternalLink } from "lucide-react";
 
 export interface StepItem {
   name: string;
@@ -57,14 +58,14 @@ export function StepStatusArea({
 
   return (
     <div className="soft-card mb-8">
-      <div className="flex items-center justify-between pb-3 mb-4 border-b border-[rgba(27,31,42,0.08)]">
+      <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#DCEEF2]">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-headline font-bold uppercase tracking-wider text-[#6b7280]">
+          <span className="text-xs font-headline font-bold uppercase tracking-wider text-[#64748B]">
             Progress & Status
           </span>
           {isAnyRunning && (
-            <span className="inline-flex items-center text-xs font-headline font-bold text-[#8a5a00]">
-              Working
+            <span className="inline-flex items-center text-xs font-headline font-bold text-[#075985]">
+              Processing
               <span className="dot-pulse">
                 <span />
                 <span />
@@ -77,7 +78,7 @@ export function StepStatusArea({
           <button
             data-ui="btn"
             onClick={onClear}
-            className="text-xs font-headline font-semibold text-[#6b7280] hover:text-[#1b1f2a] px-3 py-1 rounded-full hover:bg-gray-100 transition-colors"
+            className="text-xs font-headline font-semibold text-[#64748B] hover:text-[#040B1A] px-3 py-1 rounded-full hover:bg-slate-100 transition-colors"
           >
             Dismiss
           </button>
@@ -89,12 +90,12 @@ export function StepStatusArea({
         <div className="space-y-1 mb-4">
           {steps.map((step, idx) => {
             let stepStatus: "done" | "active" | "waiting" = "waiting";
-            let pillClass = "bg-gray-100 text-[#6b7280]";
+            let pillClass = "status-pill-neutral";
             let pillText = "Waiting";
 
             if (step.status === "running") {
               stepStatus = "active";
-              pillClass = "status-pill-warn";
+              pillClass = "status-pill-info";
               pillText = "Active";
             } else if (step.status === "done") {
               stepStatus = "done";
@@ -128,30 +129,30 @@ export function StepStatusArea({
 
       {/* Error Message Box: soft red rounded block */}
       {errorMessage && (
-        <div className="rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] p-4 text-sm mb-3">
+        <div className="rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] p-4 text-xs mb-3">
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-[#b42318]" />
-            <span className="font-headline font-bold text-xs uppercase tracking-wider text-[#b42318]">
+            <span className="w-2 h-2 rounded-full bg-[#991B1B]" />
+            <span className="font-headline font-bold uppercase tracking-wider text-[#991B1B]">
               Action Failed
             </span>
           </div>
-          <div className="text-sm font-medium text-[#1b1f2a]">{errorMessage}</div>
+          <div className="text-xs font-medium text-[#040B1A]">{errorMessage}</div>
         </div>
       )}
 
-      {/* Success Message & Tx Signature: soft green rounded block */}
+      {/* Success Message & Tx Signature: mint-aqua rounded block */}
       {successMessage && (
-        <div className="rounded-[16px] bg-[#e3f6e9] border border-[#c6edd1] p-4 text-sm mb-3">
+        <div className="rounded-xl bg-[#E6FBF8] border border-[#99F0E4] p-4 text-xs mb-3">
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-[#17803d]" />
-            <span className="font-headline font-bold text-xs uppercase tracking-wider text-[#17803d]">
+            <span className="w-2 h-2 rounded-full bg-[#065F6B]" />
+            <span className="font-headline font-bold uppercase tracking-wider text-[#065F6B]">
               Success
             </span>
           </div>
-          <div className="text-sm font-medium text-[#1b1f2a]">{successMessage}</div>
+          <div className="text-xs font-medium text-[#040B1A]">{successMessage}</div>
           {txSignature && (
-            <div className="mt-3 pt-2.5 border-t border-[#17803d]/20 flex flex-wrap items-center gap-2">
-              <span className="font-mono text-xs font-semibold text-[#17803d]">
+            <div className="mt-3 pt-2.5 border-t border-[#99F0E4]/60 flex flex-wrap items-center gap-2">
+              <span className="font-mono text-xs font-semibold text-[#065F6B]">
                 Transaction:
               </span>
               <a
@@ -159,9 +160,10 @@ export function StepStatusArea({
                 href={makeExplorerUrl(txSignature)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-xs font-medium text-[#1b1f2a] bg-white px-3 py-1 rounded-full border border-[rgba(27,31,42,0.08)] shadow-xs hover:border-[#f9c933]"
+                className="font-mono text-xs font-medium text-[#040B1A] bg-[#FFFFFF] px-3 py-1 rounded-full border border-[#DCEEF2] shadow-xs hover:border-[#00B8D9] inline-flex items-center gap-1.5"
               >
-                {formatShortAddress(txSignature, 8)} (Explorer ↗)
+                <span>{formatShortAddress(txSignature, 8)}</span>
+                <ExternalLink className="w-3 h-3 text-[#64748B]" />
               </a>
             </div>
           )}
@@ -179,11 +181,11 @@ export function ExplorerTxBadge({ txSignature }: { txSignature: string }) {
       href={makeExplorerUrl(txSignature)}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 font-mono text-xs font-medium text-[#1b1f2a] bg-white px-2.5 py-1 rounded-full border border-[rgba(27,31,42,0.08)] shadow-xs hover:border-[#f9c933]"
+      className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-[#040B1A] bg-white px-2.5 py-1 rounded-full border border-[#DCEEF2] shadow-xs hover:border-[#00B8D9]"
       title={`View transaction on Solana Explorer (${cluster === "devnet" ? "devnet" : "localhost"})`}
     >
       <span>{formatShortAddress(txSignature, 6)}</span>
-      <span className="text-[#6b7280]">↗</span>
+      <ExternalLink className="w-3 h-3 text-[#64748B]" />
     </a>
   );
 }

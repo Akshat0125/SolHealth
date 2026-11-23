@@ -282,14 +282,14 @@ export const FAQ_ENTRIES: FaqEntry[] = [
       "Phantom displays caution notices for newly deployed domains that have not yet undergone automated registry indexing. SolHealth source code is open and runs strictly client-side.",
   },
 
-  // 26. What the Guide bot can and cannot do
+  // 26. What the Orbit assistant can and cannot do
   {
     id: "guide_bot_scope",
     roles: ["all"],
-    question: "What can the Guide bot do?",
-    keywords: ["guide bot", "scope", "medical advice", "help bot", "assistant"],
+    question: "What can the Orbit assistant do?",
+    keywords: ["orbit", "orbit assistant", "guide bot", "scope", "medical advice", "help bot", "assistant"],
     answer:
-      "The Guide bot provides walkthrough assistance for SolHealth features and general non-emergency wellness precautions. It does not provide clinical care, prescriptions, or emergency services.",
+      "The Orbit assistant provides walkthrough assistance for SolHealth features and general non-emergency wellness precautions. It does not provide clinical care, prescriptions, or emergency services.",
   },
 
   // 27. Publisher role overview

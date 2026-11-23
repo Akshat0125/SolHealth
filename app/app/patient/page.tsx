@@ -958,14 +958,14 @@ export default function PatientPage() {
         nextStepText={nextStepText}
         roleDescription="Owner of medical records. Encrypts files in the browser and grants time-bound access."
       >
-        <div className="glass-card p-8 rounded-[28px] text-center space-y-4 max-w-lg mx-auto">
-          <div className="w-12 h-12 rounded-full bg-[#fcedbb] text-[#1b1f2a] flex items-center justify-center mx-auto text-xl font-bold">
+        <div className="p-8 rounded-2xl text-center space-y-4 max-w-lg mx-auto bg-[#F7FBFC] border border-[#DCEEF2] shadow-xs">
+          <div className="w-12 h-12 rounded-xl bg-[#E8F7FC] border border-[#9CE0F5] text-[#075985] flex items-center justify-center mx-auto text-xl font-bold">
             🔒
           </div>
-          <h2 className="text-xl font-headline font-bold text-[#1b1f2a]">
+          <h2 className="text-xl font-headline font-bold text-[#040B1A]">
             Connect your wallet to manage records
           </h2>
-          <p className="text-sm text-[#4b5563] leading-relaxed">
+          <p className="text-sm text-[#64748B] leading-relaxed">
             Patients encrypt their medical records directly in their browser using an encryption key derived from their wallet signature, upload them to decentralized storage, and grant time-bound access to verified doctors without revealing their private keys.
           </p>
           <div className="pt-2">
@@ -993,20 +993,20 @@ export default function PatientPage() {
       {/* ENCRYPTION SESSION BANNER IF NOT READY                   */}
       {/* ======================================================== */}
       {encryptionStatus === "mismatch" && (
-        <div className="p-4 rounded-[20px] bg-[#fde8e6] border border-[#fbd0cb] text-xs text-[#b42318] space-y-1">
+        <div className="p-4 rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] text-xs text-[#991B1B] space-y-1">
           <div className="font-headline font-bold text-sm">Encryption Key Mismatch</div>
           <p>This wallet produced a different encryption key than the one published, so older records cannot be decrypted.</p>
         </div>
       )}
 
       {encryptionStatus !== "ready" && encryptionStatus !== "mismatch" && (
-        <div className="p-5 rounded-[22px] bg-[#fffdf6] border border-[rgba(27,31,42,0.12)] space-y-3">
+        <div className="p-5 rounded-2xl bg-[#E8F7FC] border border-[#9CE0F5] space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-4 sm:gap-6">
             <div>
-              <div className="font-headline font-bold text-sm text-[#1b1f2a]">
+              <div className="font-headline font-bold text-sm text-[#040B1A]">
                 Activate encryption session
               </div>
-              <p className="text-xs text-[#6b7280]">
+              <p className="text-xs text-[#64748B]">
                 SolHealth derives your private encryption key client-side from a one-time wallet signature, so files remain private without ever revealing your wallet secret key.
               </p>
             </div>
@@ -1021,7 +1021,7 @@ export default function PatientPage() {
             </GlassButton>
           </div>
           {encryptionError && (
-            <p className="text-xs text-[#b42318]">{encryptionError}</p>
+            <p className="text-xs text-[#991B1B]">{encryptionError}</p>
           )}
         </div>
       )}
@@ -1048,7 +1048,7 @@ export default function PatientPage() {
           {/* Styled Drop Zone */}
           <label
             htmlFor="patient-file-input"
-            className="block p-6 rounded-[20px] border-2 border-dashed border-[rgba(27,31,42,0.18)] hover:border-[#f9c933] bg-[#fffdf6] cursor-pointer text-center space-y-2 transition-all"
+            className="block p-6 rounded-2xl border-2 border-dashed border-[#DCEEF2] hover:border-[#00B8D9] bg-[#F7FBFC] cursor-pointer text-center space-y-2 transition-all"
           >
             <input
               id="patient-file-input"
@@ -1056,10 +1056,10 @@ export default function PatientPage() {
               onChange={handleFileChange}
               className="hidden"
             />
-            <div className="text-sm font-headline font-bold text-[#1b1f2a]">
+            <div className="text-sm font-headline font-bold text-[#040B1A]">
               {file ? file.name : "Choose a file to encrypt"}
             </div>
-            <p className="text-xs text-[#6b7280]">
+            <p className="text-xs text-[#64748B]">
               {file
                 ? `${(file.size / 1024).toFixed(1)} KB — ready to encrypt`
                 : "Click or drag medical reports, images, or test results here (max 4 MB)"}
@@ -1112,7 +1112,7 @@ export default function PatientPage() {
         description="Manage your encrypted records, grant access to doctors, verify file integrity, and revoke permissions."
       >
         <div className="flex items-center justify-between pb-2">
-          <span className="text-xs font-headline font-semibold text-[#6b7280]">
+          <span className="text-xs font-headline font-semibold text-[#64748B]">
             {records.length} registered records
           </span>
           <GlassButton
@@ -1127,7 +1127,7 @@ export default function PatientPage() {
         </div>
 
         {recordsError && (
-          <div className="p-3.5 mb-3 rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] text-xs text-[#b42318] flex items-center justify-between gap-3">
+          <div className="p-3.5 mb-3 rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] text-xs text-[#991B1B] flex items-center justify-between gap-3">
             <span>{recordsError}</span>
             <GlassButton variant="secondary" size="sm" onClick={loadData}>
               Retry
@@ -1159,12 +1159,12 @@ export default function PatientPage() {
               return (
                 <div
                   key={rec.pda}
-                  className="p-5 sm:p-6 rounded-[22px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] space-y-4"
+                  className="p-5 sm:p-6 rounded-2xl bg-[#FFFFFF] border border-[#DCEEF2] space-y-4 shadow-xs"
                 >
                   {/* Record Header */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[rgba(27,31,42,0.06)]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#DCEEF2]">
                     <div className="flex items-center gap-2.5">
-                      <h3 className="font-headline font-bold text-base text-[#1b1f2a]">
+                      <h3 className="font-headline font-bold text-base text-[#040B1A]">
                         Record #{rec.recordId.slice(-6)}
                       </h3>
                       <span className="status-pill status-pill-ok">
@@ -1172,7 +1172,7 @@ export default function PatientPage() {
                       </span>
                     </div>
 
-                    <div className="text-xs font-mono text-[#6b7280]">
+                    <div className="text-xs font-mono text-[#64748B]">
                       {formatUtcDateTime(rec.createdAt)}
                     </div>
                   </div>
@@ -1207,19 +1207,19 @@ export default function PatientPage() {
                   {/* 3-Row Result Panel (Original / Altered / Decryption) */}
                   {tamperRes && !tamperRes.testing && (
                     tamperRes.error ? (
-                      <div className="rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] p-3.5 text-xs text-[#b42318] space-y-1">
+                      <div className="rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] p-3.5 text-xs text-[#991B1B] space-y-1">
                         <div className="font-headline font-bold uppercase tracking-wider text-[11px]">
                           Integrity Check Failed
                         </div>
                         <p>{tamperRes.error}</p>
                       </div>
                     ) : (
-                      <div className="p-3.5 rounded-[18px] bg-white border border-[rgba(27,31,42,0.08)] space-y-2.5 text-xs transition-opacity duration-300">
+                      <div className="p-3.5 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] space-y-2.5 text-xs transition-opacity duration-300">
                         {/* Row 1: Original */}
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            <span className="font-headline font-bold text-[#1b1f2a]">Original:</span>
-                            <span className="text-[#6b7280]">This file is exactly what was registered.</span>
+                            <span className="font-headline font-bold text-[#040B1A]">Original:</span>
+                            <span className="text-[#64748B]">This file is exactly what was registered.</span>
                           </div>
                           <span className={`status-pill ${tamperRes.originalMatch ? "status-pill-ok" : "status-pill-danger"}`}>
                             {tamperRes.originalMatch ? "Match" : "Mismatch"}
@@ -1227,10 +1227,10 @@ export default function PatientPage() {
                         </div>
 
                         {/* Row 2: Altered */}
-                        <div className="flex items-center justify-between gap-2 border-t border-[rgba(27,31,42,0.06)] pt-2">
+                        <div className="flex items-center justify-between gap-2 border-t border-[#DCEEF2] pt-2">
                           <div className="flex items-center gap-2">
-                            <span className="font-headline font-bold text-[#1b1f2a]">Altered:</span>
-                            <span className="text-[#6b7280]">Changing a single byte is detected.</span>
+                            <span className="font-headline font-bold text-[#040B1A]">Altered:</span>
+                            <span className="text-[#64748B]">Changing a single byte is detected.</span>
                           </div>
                           <span className="status-pill status-pill-danger">
                             Mismatch
@@ -1238,10 +1238,10 @@ export default function PatientPage() {
                         </div>
 
                         {/* Row 3: Decryption */}
-                        <div className="flex items-center justify-between gap-2 border-t border-[rgba(27,31,42,0.06)] pt-2">
+                        <div className="flex items-center justify-between gap-2 border-t border-[#DCEEF2] pt-2">
                           <div className="flex items-center gap-2">
-                            <span className="font-headline font-bold text-[#1b1f2a]">Decryption:</span>
-                            <span className="text-[#6b7280]">
+                            <span className="font-headline font-bold text-[#040B1A]">Decryption:</span>
+                            <span className="text-[#64748B]">
                               {tamperRes.tamperedDecryptFailed
                                 ? "Decryption of the altered file failed: authentication check rejected it."
                                 : "Altered file decrypted."}{" "}
@@ -1274,15 +1274,15 @@ export default function PatientPage() {
 
                   {/* EXPANDABLE INLINE SHARE FORM */}
                   {isShareOpen && (
-                    <div className="p-4 sm:p-5 rounded-[18px] bg-white border border-[rgba(27,31,42,0.08)] space-y-4 shadow-xs">
-                      <div className="font-headline font-bold text-sm text-[#1b1f2a]">
+                    <div className="p-4 sm:p-5 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] space-y-4 shadow-xs">
+                      <div className="font-headline font-bold text-sm text-[#040B1A]">
                         Share this record with a doctor
                       </div>
 
                       <div className="space-y-3">
                         <div className="space-y-1">
                           <div className="flex items-center justify-between">
-                            <label className="text-xs font-headline font-semibold text-[#1b1f2a]">
+                            <label className="text-xs font-headline font-semibold text-[#040B1A]">
                               Doctor&apos;s wallet address
                             </label>
                             {demoDoctorKey && (
@@ -1325,7 +1325,7 @@ export default function PatientPage() {
 
                         {/* Duration Options */}
                         <div className="space-y-1.5">
-                          <label className="text-xs font-headline font-semibold text-[#1b1f2a]">
+                          <label className="text-xs font-headline font-semibold text-[#040B1A]">
                             How long should they have access?
                           </label>
 
@@ -1387,8 +1387,8 @@ export default function PatientPage() {
 
                   {/* WHO HAS ACCESS MINI-LIST */}
                   {matchingGrants.length > 0 && (
-                    <div className="pt-2 border-t border-[rgba(27,31,42,0.06)] space-y-2">
-                      <div className="text-xs font-headline font-bold text-[#6b7280] uppercase tracking-wider">
+                    <div className="pt-2 border-t border-[#DCEEF2] space-y-2">
+                      <div className="text-xs font-headline font-bold text-[#64748B] uppercase tracking-wider">
                         Who has access
                       </div>
 
@@ -1400,10 +1400,10 @@ export default function PatientPage() {
                           return (
                             <div
                               key={grant.pda}
-                              className="p-3 rounded-[16px] bg-white border border-[rgba(27,31,42,0.06)] grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-3 sm:gap-4"
+                              className="p-3.5 rounded-xl bg-white border border-[#DCEEF2] grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-3 sm:gap-4 shadow-xs"
                             >
                               <div className="flex items-center gap-2.5">
-                                <span className="font-mono text-xs font-bold text-[#1b1f2a]">
+                                <span className="font-mono text-xs font-bold text-[#040B1A]">
                                   {formatShortAddress(grant.doctor, 6)}
                                 </span>
                                 {grant.status === "active" && (
@@ -1417,14 +1417,14 @@ export default function PatientPage() {
                                   </span>
                                 )}
                                 {grant.status === "revoked" && (
-                                  <span className="status-pill status-pill-danger">
+                                  <span className="status-pill status-pill-neutral">
                                     Revoked
                                   </span>
                                 )}
                               </div>
 
                               <div className="flex items-center gap-3">
-                                <span className="font-mono text-xs text-[#6b7280]">
+                                <span className="font-mono text-xs text-[#64748B]">
                                   Expires {formatUtcDateTime(grant.expiry)}
                                 </span>
 

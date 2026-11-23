@@ -9,6 +9,7 @@ import { matchSymptomsLayer1, SymptomMatchResult } from "@/lib/guide/symptoms";
 import { smartMatcher, SmartMatcherState } from "@/lib/guide/smart-matcher";
 import { FaqEntry, GuideRole } from "@/data/guide/faq";
 import { DISCLAIMER, PRIVACY_NOTE, EMERGENCY_MESSAGE, SELF_HARM_MESSAGE } from "@/data/guide/emergency";
+import { X, Send, ArrowRight, ShieldAlert, CheckCircle2 } from "lucide-react";
 
 interface ChatMessage {
   id: string;
@@ -133,7 +134,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
         {
           id: "welcome",
           sender: "bot",
-          text: "Hello! I am your SolHealth Guide. How can I assist you with using the platform today?",
+          text: "Hello! I am SolHealth Orbit, your on-chain health records assistant. How can I assist you with using the platform today?",
           suggestions: getSuggestions(guideContext.activeRole === "home" ? "all" : (guideContext.activeRole as GuideRole), pathname || undefined),
         },
       ]);
@@ -179,7 +180,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
     setQuery("");
   };
 
-  // Handle "What should I do next?"
+  // Handle "What should I do next?" trigger
   const handleNextStepClick = () => {
     const next = getNextStep(guideContext, pathname || undefined);
     const userMsgId = `user_${Date.now()}`;
@@ -197,19 +198,18 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
     ]);
   };
 
-  // Clear Conversation
   const handleClearChat = () => {
     setMessages([
       {
         id: `welcome_${Date.now()}`,
         sender: "bot",
-        text: "Conversation cleared. How else can I help you?",
+        text: "Conversation cleared. What can SolHealth Orbit help you with?",
         suggestions: getSuggestions(guideContext.activeRole === "home" ? "all" : (guideContext.activeRole as GuideRole), pathname || undefined),
       },
     ]);
   };
 
-  // Handle Symptom Form Submission
+  // Handle Symptom Form Submit
   const handleSymptomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const text = symptomText.trim();
@@ -244,7 +244,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
     }
   };
 
-  // Role Quick-Replies based on role
+  // Quick replies per role
   const quickRepliesByRole: Record<string, string[]> = {
     patient: [
       "How do I upload a record?",
@@ -283,14 +283,16 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
       aria-labelledby={titleId}
       className="guide-panel-container"
     >
+      {/* Brand Accent Header Strip */}
+      <div className="h-1 bg-[linear-gradient(135deg,#5EFCE8_0%,#2EE8C8_35%,#00C4E0_70%,#0084C2_100%)] w-full shrink-0" />
+
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[rgba(27,31,42,0.08)] bg-white/90 select-none">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#DCEEF2] bg-white select-none">
         <div className="flex items-center gap-2.5">
-          <span className="guide-badge-dot" aria-hidden="true" />
-          <h2 id={titleId} className="font-headline font-bold text-sm text-[#1b1f2a]">
-            SolHealth Guide
+          <h2 id={titleId} className="font-headline font-bold text-sm text-[#040B1A]">
+            SolHealth Orbit
           </h2>
-          <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#fcedbb] text-[#8a5a00] font-semibold capitalize">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#E8F7FC] text-[#075985] border border-[#9CE0F5] font-semibold capitalize">
             {guideContext.activeRole}
           </span>
         </div>
@@ -300,7 +302,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
             <button
               type="button"
               onClick={handleClearChat}
-              className="text-xs text-[#6b7280] hover:text-[#1b1f2a] px-2 py-1 rounded-md transition-colors"
+              className="text-xs text-[#64748B] hover:text-[#040B1A] px-2 py-1 rounded-md transition-colors"
               title="Clear conversation"
             >
               Clear
@@ -310,16 +312,16 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close guide"
-            className="w-7 h-7 rounded-full flex items-center justify-center text-[#6b7280] hover:text-[#1b1f2a] hover:bg-black/5 transition-colors"
+            aria-label="Close Orbit"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#040B1A] hover:bg-[#F7FBFC] transition-colors"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* Tabs (Symptom precautions tab is only visible on /patient) */}
-      <div className="flex items-center border-b border-[rgba(27,31,42,0.08)] bg-[#fffdf6]/70 px-4 pt-1 select-none">
+      <div className="flex items-center border-b border-[#DCEEF2] bg-[#F7FBFC] px-4 pt-1 select-none">
         <button
           type="button"
           role="tab"
@@ -327,11 +329,11 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
           onClick={() => setActiveTab("help")}
           className={`px-3 py-2 text-xs font-headline font-bold border-b-2 transition-all ${
             activeTab === "help"
-              ? "border-[#f9c933] text-[#1b1f2a]"
-              : "border-transparent text-[#6b7280] hover:text-[#1b1f2a]"
+              ? "border-[#00B8D9] text-[#075985]"
+              : "border-transparent text-[#64748B] hover:text-[#040B1A]"
           }`}
         >
-          Help
+          Help & Walkthrough
         </button>
 
         {isPatientRoute && (
@@ -342,8 +344,8 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
             onClick={() => setActiveTab("symptoms")}
             className={`px-3 py-2 text-xs font-headline font-bold border-b-2 transition-all ${
               activeTab === "symptoms"
-                ? "border-[#f9c933] text-[#1b1f2a]"
-                : "border-transparent text-[#6b7280] hover:text-[#1b1f2a]"
+                ? "border-[#00B8D9] text-[#075985]"
+                : "border-transparent text-[#64748B] hover:text-[#040B1A]"
             }`}
           >
             Symptom precautions
@@ -355,15 +357,14 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
       {/* TAB 1: HELP (FAQ, Guidance, Walkthrough)                 */}
       {/* ======================================================== */}
       {activeTab === "help" && (
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 flex flex-col min-h-0 bg-white">
           {/* Top Quick Actions */}
-          <div className="px-4 py-2.5 bg-[#fffdf6] border-b border-[rgba(27,31,42,0.06)] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="px-4 py-2 bg-[#F7FBFC] border-b border-[#DCEEF2] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             <button
               type="button"
               onClick={handleNextStepClick}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f9c933]/25 hover:bg-[#f9c933]/40 border border-[#f9c933] text-[#1b1f2a] font-headline font-bold text-xs whitespace-nowrap transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E6FBF8] hover:bg-[#d6f7f2] border border-[#99F0E4] text-[#065F6B] font-headline font-bold text-xs whitespace-nowrap transition-colors"
             >
-              <span>✨</span>
               <span>What should I do next?</span>
             </button>
           </div>
@@ -380,33 +381,33 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                 className={`flex flex-col ${m.sender === "user" ? "items-end" : "items-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-[18px] px-3.5 py-2.5 text-xs leading-relaxed ${
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-xs ${
                     m.sender === "user"
-                      ? "bg-[#fff1a8] text-[#1b1f2a] font-medium rounded-br-xs border border-[#fde293]"
-                      : "bg-white text-[#1b1f2a] border border-[rgba(27,31,42,0.1)] rounded-bl-xs shadow-xs"
+                      ? "bg-[#040B1A] text-white font-medium rounded-br-xs border border-[#040B1A]"
+                      : "bg-[#E6FBF8] text-[#040B1A] border border-[#99F0E4] rounded-bl-xs"
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{m.text}</p>
 
                   {m.nextAction && m.nextAction.route && (
-                    <div className="mt-2.5 pt-2 border-t border-[rgba(27,31,42,0.06)]">
+                    <div className="mt-2.5 pt-2 border-t border-[#99F0E4]/60">
                       <button
                         type="button"
                         onClick={() => {
                           if (m.nextAction?.route) router.push(m.nextAction.route);
                           onClose();
                         }}
-                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f9c933] hover:bg-[#ebd052] text-[#1b1f2a] font-headline font-bold text-xs transition-colors"
+                        className="glass-btn glass-btn-primary !min-h-[30px] !h-[30px] !px-3 text-xs"
                       >
                         <span>{m.nextAction.label || "Go to page"}</span>
-                        <span>→</span>
+                        <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>
                   )}
 
                   {m.suggestions && m.suggestions.length > 0 && (
-                    <div className="mt-2.5 space-y-1.5 pt-2 border-t border-[rgba(27,31,42,0.06)]">
-                      <div className="text-[11px] font-semibold text-[#6b7280]">
+                    <div className="mt-2.5 space-y-1.5 pt-2 border-t border-[#99F0E4]/60">
+                      <div className="text-[11px] font-semibold text-[#075985]">
                         Suggested questions:
                       </div>
                       <div className="flex flex-col gap-1">
@@ -415,7 +416,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                             key={s.id}
                             type="button"
                             onClick={() => handleAskQuestion(s.question)}
-                            className="text-left text-xs text-[#8a5a00] hover:text-[#1b1f2a] hover:underline"
+                            className="text-left text-xs text-[#075985] hover:text-[#040B1A] hover:underline"
                           >
                             • {s.question}
                           </button>
@@ -430,13 +431,13 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
           </div>
 
           {/* Quick-reply chip bar */}
-          <div className="px-4 py-2 border-t border-[rgba(27,31,42,0.06)] bg-[#fffdf6] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="px-4 py-2 border-t border-[#DCEEF2] bg-[#F7FBFC] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {currentQuickReplies.map((qr) => (
               <button
                 key={qr}
                 type="button"
                 onClick={() => handleAskQuestion(qr)}
-                className="px-2.5 py-1 rounded-full bg-white hover:bg-[#fff9e6] border border-[rgba(27,31,42,0.1)] text-[11px] text-[#4b5563] hover:text-[#1b1f2a] whitespace-nowrap transition-colors"
+                className="px-2.5 py-1 rounded-full bg-white hover:bg-[#E8F7FC] border border-[#DCEEF2] text-[11px] text-[#1E293B] hover:text-[#075985] whitespace-nowrap transition-colors"
               >
                 {qr}
               </button>
@@ -449,23 +450,23 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
               e.preventDefault();
               handleAskQuestion(query);
             }}
-            className="p-3 border-t border-[rgba(27,31,42,0.08)] bg-white flex items-center gap-2"
+            className="p-3 border-t border-[#DCEEF2] bg-white flex items-center gap-2"
           >
             <input
               ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask a question about SolHealth..."
-              aria-label="Ask a question"
-              className="flex-1 px-3 py-2 rounded-full bg-[#fffdf6] border border-[rgba(27,31,42,0.14)] text-xs text-[#1b1f2a] placeholder-[#9ca3af] focus:outline-none focus:border-[#f9c933] transition-colors"
+              placeholder="Ask Orbit a question about SolHealth..."
+              aria-label="Ask Orbit a question"
+              className="flex-1 px-3.5 py-2 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] text-xs text-[#040B1A] placeholder-[#94A3B8] focus:outline-none focus:border-[#00B8D9] transition-colors"
             />
             <button
               type="submit"
               disabled={!query.trim()}
-              className="px-3.5 py-2 rounded-full bg-[#f9c933] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#ebd052] text-[#1b1f2a] font-headline font-bold text-xs transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-[#040B1A] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#075985] text-white font-headline font-bold text-xs transition-colors inline-flex items-center gap-1"
             >
-              Send
+              <Send className="w-3.5 h-3.5" />
             </button>
           </form>
         </div>
@@ -475,22 +476,22 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
       {/* TAB 2: SYMPTOM PRECAUTIONS (Patient Only)                */}
       {/* ======================================================== */}
       {activeTab === "symptoms" && isPatientRoute && (
-        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 space-y-4 guide-custom-scrollbar">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 space-y-4 guide-custom-scrollbar bg-white">
           {/* 1. Top Disclaimers */}
-          <div className="p-3 rounded-[16px] bg-[#fff8d6] border border-[#fde293] text-xs text-[#8a5a00] leading-relaxed">
+          <div className="p-3 rounded-xl bg-[#FFF8E6] border border-[#FDE293] text-xs text-[#92400E] leading-relaxed">
             <span className="font-headline font-bold">Important: </span>
             {DISCLAIMER}
           </div>
 
-          <div className="p-2.5 rounded-[14px] bg-[#e3f6e9] border border-[#c4eed0] text-[11px] text-[#17803d] flex items-start gap-2">
-            <span className="text-sm select-none">🔒</span>
+          <div className="p-2.5 rounded-xl bg-[#E6FBF8] border border-[#99F0E4] text-[11px] text-[#065F6B] flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-[#00B8D9] mt-0.5" />
             <p className="leading-snug">{PRIVACY_NOTE}</p>
           </div>
 
-          {/* 2. Smart matching toggle (Phase 4) */}
-          <div className="p-3 rounded-[16px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] space-y-2">
+          {/* 2. Smart matching toggle */}
+          <div className="p-3 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] space-y-2">
             <div className="flex items-center justify-between">
-              <label htmlFor="smart-matching-toggle" className="text-xs font-headline font-bold text-[#1b1f2a] cursor-pointer">
+              <label htmlFor="smart-matching-toggle" className="text-xs font-headline font-bold text-[#040B1A] cursor-pointer">
                 Smart matching (optional)
               </label>
               <input
@@ -498,24 +499,24 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                 type="checkbox"
                 checked={smartMatchingEnabled}
                 onChange={(e) => handleToggleSmartMatching(e.target.checked)}
-                className="w-4 h-4 accent-[#f9c933] cursor-pointer"
+                className="w-4 h-4 accent-[#00B8D9] cursor-pointer"
               />
             </div>
 
-            <p className="text-[11px] text-[#6b7280] leading-relaxed">
+            <p className="text-[11px] text-[#64748B] leading-relaxed">
               Downloads a small language model (about 25 MB) once and runs it in your browser. Your text is not sent anywhere.
             </p>
 
             {smartMatchingEnabled && (
               <div className="pt-1 flex items-center justify-between text-[11px] font-mono">
-                <span className="text-[#6b7280]">Status:</span>
+                <span className="text-[#64748B]">Status:</span>
                 <span
                   className={
                     smartState.status === "ready"
-                      ? "text-[#17803d] font-semibold"
+                      ? "text-[#065F6B] font-semibold"
                       : smartState.status === "error"
-                      ? "text-[#b42318]"
-                      : "text-[#8a5a00]"
+                      ? "text-[#991B1B]"
+                      : "text-[#075985]"
                   }
                 >
                   {smartState.message || (smartState.status === "ready" ? "Ready" : "Initializing...")}
@@ -527,7 +528,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
           {/* 3. Input form */}
           <form onSubmit={handleSymptomSubmit} className="space-y-3">
             <div>
-              <label htmlFor="symptom-input" className="block text-xs font-headline font-bold text-[#1b1f2a] mb-1">
+              <label htmlFor="symptom-input" className="block text-xs font-headline font-bold text-[#040B1A] mb-1">
                 Describe how you feel
               </label>
               <textarea
@@ -536,7 +537,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                 value={symptomText}
                 onChange={(e) => setSymptomText(e.target.value)}
                 placeholder="e.g. fever, headache, minor cut, cough..."
-                className="w-full p-2.5 rounded-[16px] bg-white border border-[rgba(27,31,42,0.14)] text-xs text-[#1b1f2a] placeholder-[#9ca3af] focus:outline-none focus:border-[#f9c933] resize-none"
+                className="w-full p-2.5 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] text-xs text-[#040B1A] placeholder-[#94A3B8] focus:outline-none focus:border-[#00B8D9] resize-none"
               />
             </div>
 
@@ -544,7 +545,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
               <button
                 type="submit"
                 disabled={!symptomText.trim() || symptomLoading}
-                className="px-4 py-2 rounded-full bg-[#f9c933] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#ebd052] text-[#1b1f2a] font-headline font-bold text-xs transition-colors"
+                className="glass-btn glass-btn-primary !min-h-[36px] !px-4 text-xs font-bold"
               >
                 {symptomLoading ? "Checking..." : "Check precautions"}
               </button>
@@ -557,7 +558,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                     setRedFlagResult(null);
                     setSymptomResult(null);
                   }}
-                  className="text-xs text-[#6b7280] hover:text-[#1b1f2a]"
+                  className="text-xs text-[#64748B] hover:text-[#040B1A]"
                 >
                   Clear results
                 </button>
@@ -566,11 +567,11 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
           </form>
 
           {/* 4. Results Area */}
-          {/* (a) Red-flag match: ONLY EMERGENCY_MESSAGE, no precautions */}
+          {/* (a) Red-flag match */}
           {redFlagResult && (
-            <div className="p-4 rounded-[20px] bg-[#fde8e6] border-2 border-[#fbd0cb] text-[#b42318] space-y-2 animate-fadeIn">
+            <div className="p-4 rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] text-[#991B1B] space-y-2 animate-fadeIn">
               <div className="flex items-center gap-2">
-                <span className="text-base select-none">🚨</span>
+                <ShieldAlert className="w-5 h-5 text-[#991B1B] shrink-0" />
                 <span className="font-headline font-bold text-xs uppercase tracking-wider">
                   Urgent Medical Attention Needed
                 </span>
@@ -587,23 +588,23 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
               {symptomResult.groups.map((item) => (
                 <div
                   key={item.group.id}
-                  className="p-4 rounded-[20px] bg-white border border-[rgba(27,31,42,0.1)] space-y-3 shadow-xs"
+                  className="p-4 rounded-xl bg-white border border-[#DCEEF2] space-y-3 shadow-xs"
                 >
-                  <div className="flex items-center justify-between gap-2 border-b border-[rgba(27,31,42,0.06)] pb-2">
-                    <h3 className="font-headline font-bold text-xs text-[#1b1f2a]">
+                  <div className="flex items-center justify-between gap-2 border-b border-[#DCEEF2] pb-2">
+                    <h3 className="font-headline font-bold text-xs text-[#040B1A]">
                       {item.group.title}
                     </h3>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#fcedbb] text-[#8a5a00] font-semibold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#E8F7FC] text-[#075985] border border-[#9CE0F5] font-semibold">
                       {item.confidence} match
                     </span>
                   </div>
 
                   {/* General Precautions */}
                   <div className="space-y-1.5">
-                    <div className="text-[11px] font-headline font-bold text-[#1b1f2a]">
+                    <div className="text-[11px] font-headline font-bold text-[#040B1A]">
                       General precautions:
                     </div>
-                    <ul className="text-xs text-[#4b5563] space-y-1 pl-4 list-disc leading-relaxed">
+                    <ul className="text-xs text-[#1E293B] space-y-1 pl-4 list-disc leading-relaxed">
                       {item.group.precautions.map((p, idx) => (
                         <li key={idx}>{p}</li>
                       ))}
@@ -611,11 +612,11 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                   </div>
 
                   {/* See Someone If */}
-                  <div className="space-y-1.5 pt-2 border-t border-[rgba(27,31,42,0.06)]">
-                    <div className="text-[11px] font-headline font-bold text-[#b42318]">
+                  <div className="space-y-1.5 pt-2 border-t border-[#DCEEF2]">
+                    <div className="text-[11px] font-headline font-bold text-[#991B1B]">
                       See a doctor if:
                     </div>
-                    <ul className="text-xs text-[#4b5563] space-y-1 pl-4 list-disc leading-relaxed">
+                    <ul className="text-xs text-[#64748B] space-y-1 pl-4 list-disc leading-relaxed">
                       {item.group.seeSomeoneIf.map((s, idx) => (
                         <li key={idx}>{s}</li>
                       ))}
@@ -624,7 +625,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
                 </div>
               ))}
 
-              <div className="p-3 rounded-[14px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] text-[11px] text-[#6b7280] leading-relaxed">
+              <div className="p-3 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] text-[11px] text-[#64748B] leading-relaxed">
                 {DISCLAIMER}
               </div>
             </div>
@@ -632,12 +633,17 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
 
           {/* (c) No match message */}
           {!redFlagResult && symptomResult && !symptomResult.matched && (
-            <div className="p-4 rounded-[18px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] text-center text-xs text-[#6b7280] space-y-1">
+            <div className="p-4 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] text-center text-xs text-[#64748B] space-y-1">
               <p>{symptomResult.message || "I can't suggest precautions for that. Please consult a doctor."}</p>
             </div>
           )}
         </div>
       )}
+
+      {/* Persistent Disclaimer Bar */}
+      <div className="px-4 py-2 bg-[#F7FBFC] border-t border-[#DCEEF2] text-[11px] font-mono text-[#64748B] text-center shrink-0">
+        General information only, not medical advice.
+      </div>
     </div>
   );
 }

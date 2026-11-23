@@ -7,6 +7,7 @@ import { formatShortAddress } from "@/lib/format";
 import { GlassButton } from "@/components/GlassButton";
 import { makeExplorerUrl, StepItem } from "@/components/StepStatus";
 import { StepRow } from "@/components/StepRow";
+import { Copy, Check, ChevronRight, ExternalLink } from "lucide-react";
 
 export interface ChecklistStep {
   number: string;
@@ -83,65 +84,75 @@ export function RolePage({
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-65px)] bg-[#fffdf6] py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* 3 Fixed Decorative Blurred Blobs (inner routes only) */}
+    <div className="relative min-h-[calc(100vh-100px)] bg-[#FFFFFF] py-6 sm:py-8 px-4 sm:px-6 lg:px-8 overflow-x-clip">
+      {/* Decorative Cyan / Mint Ambient Glows */}
       <div
         aria-hidden="true"
-        className="fixed pointer-events-none select-none z-0 top-[-60px] left-[-60px] w-[460px] h-[460px] bg-[#fff1a8] opacity-55 rounded-full blur-[90px]"
+        className="fixed pointer-events-none select-none z-0 top-[-60px] left-[-60px] w-[500px] h-[500px] bg-[#E6FBF8] opacity-50 rounded-full blur-[100px]"
       />
       <div
         aria-hidden="true"
-        className="fixed pointer-events-none select-none z-0 top-[25%] right-[-80px] w-[500px] h-[500px] bg-[#ffe3ee] opacity-50 rounded-full blur-[90px]"
+        className="fixed pointer-events-none select-none z-0 top-[30%] right-[-80px] w-[520px] h-[520px] bg-[#E8F7FC] opacity-60 rounded-full blur-[100px]"
       />
       <div
         aria-hidden="true"
-        className="fixed pointer-events-none select-none z-0 bottom-[-40px] left-[20%] w-[480px] h-[480px] bg-[#fff8d6] opacity-65 rounded-full blur-[90px]"
+        className="fixed pointer-events-none select-none z-0 bottom-[-40px] left-[20%] w-[480px] h-[480px] bg-[#F0FDF4] opacity-35 rounded-full blur-[100px]"
       />
 
-      <div className="relative z-10 max-w-[1140px] mx-auto space-y-8">
+      <div className="relative z-10 max-w-[1180px] mx-auto space-y-8">
         
         {/* ======================================================== */}
         {/* HEADER                                                   */}
         {/* ======================================================== */}
-        <header>
-          {/* Pill Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="mb-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[rgba(27,31,42,0.08)] shadow-xs text-xs font-headline font-semibold text-[#6b7280]">
-              <Link href="/" className="hover:text-[#1b1f2a]">
+        <header className="space-y-4">
+          {/* Breadcrumb Pill */}
+          <nav aria-label="Breadcrumb">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#DCEEF2] shadow-xs text-xs font-headline font-semibold text-[#64748B]">
+              <Link href="/" className="hover:text-[#040B1A] transition-colors">
                 Home
               </Link>
-              <span className="text-[#9ca3af]">/</span>
-              <span className="text-[#1b1f2a] font-bold">{breadcrumbLabel}</span>
+              <ChevronRight className="w-3 h-3 text-[#94A3B8]" />
+              <span className="text-[#040B1A] font-bold">{breadcrumbLabel}</span>
             </div>
           </nav>
 
+          {/* Prototype Devnet Disclaimer Notice */}
+          {(role === "issuer" || role === "patient") && (
+            <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[#E8F7FC] border border-[#9CE0F5] text-xs text-[#075985] font-headline">
+              <span className="w-2 h-2 rounded-full bg-[#14D9C4] animate-pulse shrink-0" />
+              <span>
+                <strong>Prototype running on Solana Devnet.</strong> Do not upload real medical records.
+              </span>
+            </div>
+          )}
+
           {/* Title as a plain question + one line helper */}
           <div>
-            <h1 className="font-headline text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1b1f2a] tracking-tight leading-[1.1] mb-[12px]">
+            <h1 className="font-headline text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#040B1A] tracking-tight leading-[1.1] mb-3">
               {titleQuestion}
             </h1>
-            <p className="max-w-[65ch] text-sm sm:text-base text-[#6b7280] font-body leading-[1.5] mb-[16px]">
-              <span className="font-semibold text-[#1b1f2a]">What you can do here: </span>
+            <p className="max-w-[70ch] text-sm sm:text-base text-[#64748B] font-body leading-relaxed">
+              <span className="font-semibold text-[#040B1A]">What you can do here: </span>
               {whatYouCanDo}
             </p>
           </div>
 
-          {/* Progress Checklist (Horizontal row of step chips, wraps on mobile) */}
+          {/* Progress Checklist (Horizontal row of step chips) */}
           <div className="overflow-visible py-1">
             <div className="flex flex-wrap items-center gap-2.5 overflow-visible">
               {checklist.map((step) => {
-                let statusClasses = "bg-white/80 text-[#6b7280] border-[rgba(27,31,42,0.1)]";
+                let statusClasses = "bg-[#FFFFFF] text-[#64748B] border-[#DCEEF2]";
                 let statusBadge = "Waiting";
-                let badgeClass = "bg-gray-100 text-[#6b7280]";
+                let badgeClass = "bg-[#F1F5F9] text-[#64748B] border border-[#E2E8F0]";
 
                 if (step.status === "done") {
-                  statusClasses = "bg-[#e3f6e9] text-[#17803d] border-[#c6edd1]";
+                  statusClasses = "bg-[#E6FBF8] text-[#065F6B] border-[#99F0E4]";
                   statusBadge = "Done";
-                  badgeClass = "bg-[#17803d] text-white";
+                  badgeClass = "bg-[#14D9C4] text-[#040B1A]";
                 } else if (step.status === "next") {
-                  statusClasses = "bg-[#fff1cc] text-[#8a5a00] border-[#fde293] font-bold shadow-xs ring-2 ring-[#f9c933]/40";
+                  statusClasses = "bg-[#E8F7FC] text-[#075985] border-[#9CE0F5] font-bold shadow-xs ring-2 ring-[#00B8D9]/25";
                   statusBadge = "Next";
-                  badgeClass = "bg-[#f9c933] text-[#1b1f2a]";
+                  badgeClass = "bg-[#075985] text-white";
                 }
 
                 return (
@@ -150,16 +161,16 @@ export function RolePage({
                     data-ui="btn"
                     type="button"
                     onClick={() => handleScrollToCard(step.targetCardId)}
-                    className={`inline-flex items-center gap-2 h-[40px] px-[14px] rounded-full border text-xs font-headline transition-all cursor-pointer hover:brightness-95 select-none shrink-0 leading-[1.2] ${statusClasses}`}
+                    className={`inline-flex items-center gap-2 h-[38px] px-3.5 rounded-xl border text-xs font-headline transition-all cursor-pointer hover:border-[#00B8D9] select-none shrink-0 leading-none ${statusClasses}`}
                     title={`Click to scroll to step ${step.number}`}
                   >
-                    <span className="w-[22px] h-[22px] min-w-[22px] min-h-[22px] rounded-full bg-black/5 flex items-center justify-center font-mono font-bold text-[11px] leading-none shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-black/5 flex items-center justify-center font-mono font-bold text-[11px] leading-none shrink-0">
                       {step.number}
                     </span>
                     <span className="font-semibold">{step.label}</span>
                     <span
                       data-ui="pill"
-                      className={`inline-flex items-center justify-center h-[20px] px-2 rounded-full text-[11px] font-bold uppercase leading-none whitespace-nowrap ${badgeClass}`}
+                      className={`inline-flex items-center justify-center h-[18px] px-2 rounded-full text-[10px] font-bold uppercase leading-none whitespace-nowrap ${badgeClass}`}
                     >
                       {statusBadge}
                     </span>
@@ -171,37 +182,37 @@ export function RolePage({
         </header>
 
         {/* ======================================================== */}
-        {/* BODY: TWO COLUMNS (Main 2/3, Side 1/3 sticky)            */}
+        {/* BODY: TWO COLUMNS (Main, Side 320px sticky)              */}
         {/* ======================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
           
           {/* Mobile Side Panel: Compact summary displayed first on mobile */}
           <div className="block lg:hidden">
-            <div className="soft-card p-4 space-y-3 bg-white">
+            <div className="soft-card p-4 space-y-3 bg-[#F7FBFC] border border-[#DCEEF2]">
               <div className="flex items-center justify-between">
-                <div className="flex flex-row items-center gap-[10px]">
+                <div className="flex flex-row items-center gap-2.5">
                   <span className={`role-dot ${ready ? "role-dot-active" : "role-dot-inactive"}`} />
-                  <span className="font-headline font-bold text-sm text-[#1b1f2a] leading-[1.2]">
+                  <span className="font-headline font-bold text-sm text-[#040B1A]">
                     Acting as {roleTitle}
                   </span>
                 </div>
-                <div className="font-mono text-xs text-[#6b7280]">
+                <div className="font-mono text-xs text-[#64748B]">
                   {balanceVal !== null ? `${balanceVal.toFixed(2)} SOL` : "----"}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs font-mono text-[#6b7280] bg-[#fffdf6] p-2 rounded-lg border border-[rgba(27,31,42,0.06)]">
+              <div className="flex items-center justify-between text-xs font-mono text-[#64748B] bg-[#FFFFFF] p-2 rounded-xl border border-[#DCEEF2]">
                 <span className="truncate max-w-[200px]">{shortAddress}</span>
                 <button
                   data-ui="btn"
                   onClick={handleCopy}
-                  className="font-bold text-[#8a5a00] hover:underline"
+                  className="font-headline font-bold text-[#075985] hover:underline"
                 >
                   {copied ? "Copied" : "Copy"}
                 </button>
               </div>
 
-              <div className="text-xs bg-[#fff8d6] p-2 rounded-lg border border-[#fde293] text-[#8a5a00]">
+              <div className="text-xs bg-[#E8F7FC] p-2.5 rounded-xl border border-[#9CE0F5] text-[#075985]">
                 <span className="font-bold">Next: </span>
                 {nextStepText}
               </div>
@@ -223,50 +234,51 @@ export function RolePage({
             {children}
           </main>
 
-          {/* DESKTOP SIDE PANEL (Sticky, 24px radius flat white card) */}
+          {/* DESKTOP SIDE PANEL (Sticky, 16px radius surface card) */}
           <aside className="hidden lg:block sticky top-[84px] space-y-4">
-            <div className="soft-card p-6 space-y-5 bg-white">
+            <div className="soft-card p-6 space-y-5 bg-[#F7FBFC] border border-[#DCEEF2]">
               {/* Section 1: You are acting as */}
               <div className="space-y-2">
-                <div className="text-[11px] font-headline font-bold uppercase tracking-wider text-[#6b7280]">
+                <div className="text-[10.5px] font-mono font-bold uppercase tracking-wider text-[#64748B]">
                   You are acting as
                 </div>
-                <div className="flex flex-row items-center gap-[10px]">
+                <div className="flex flex-row items-center gap-2.5">
                   <span className={`role-dot ${ready ? "role-dot-active" : "role-dot-inactive"}`} />
-                  <h2 className="font-headline text-lg font-bold text-[#1b1f2a] leading-[1.2]">
+                  <h2 className="font-headline text-lg font-extrabold text-[#040B1A]">
                     {roleTitle}
                   </h2>
                 </div>
-                <p className="text-xs text-[#6b7280] font-body leading-relaxed">
+                <p className="text-xs text-[#64748B] font-body leading-relaxed">
                   {roleDescription}
                 </p>
               </div>
 
               {/* Hairline Divider */}
-              <div className="border-t border-[rgba(27,31,42,0.08)]" />
+              <div className="border-t border-[#DCEEF2]" />
 
               {/* Section 2: Wallet Details */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#6b7280]">Wallet Address</span>
+                  <span className="text-[#64748B] font-headline font-medium">Wallet Address</span>
                   <div className="flex items-center gap-1.5 font-mono">
-                    <span className="font-bold text-[#1b1f2a]">{shortAddress}</span>
+                    <span className="font-bold text-[#040B1A]">{shortAddress}</span>
                     <button
                       type="button"
                       data-ui="btn"
                       onClick={handleCopy}
                       disabled={!ready || !address}
-                      className="text-[10px] font-headline font-bold uppercase text-[#8a5a00] hover:text-[#1b1f2a] px-1.5 py-0.5 rounded bg-white border border-[rgba(27,31,42,0.08)] disabled:opacity-40"
+                      className="text-[10px] font-headline font-bold uppercase text-[#075985] hover:text-[#040B1A] px-2 py-0.5 rounded-md bg-[#FFFFFF] border border-[#DCEEF2] disabled:opacity-40 inline-flex items-center gap-1"
                     >
-                      {copied ? "Copied" : "Copy"}
+                      {copied ? <Check className="w-3 h-3 text-[#065F6B]" /> : <Copy className="w-3 h-3" />}
+                      <span>{copied ? "Copied" : "Copy"}</span>
                     </button>
                   </div>
                 </div>
 
                 {role !== "audit" && (
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#6b7280]">Balance</span>
-                    <span className="font-headline font-bold text-[#1b1f2a]">
+                    <span className="text-[#64748B] font-headline font-medium">Balance</span>
+                    <span className="font-mono font-bold text-[#040B1A]">
                       {balanceVal !== null ? `${balanceVal.toFixed(2)} SOL` : "----"}
                     </span>
                   </div>
@@ -284,14 +296,14 @@ export function RolePage({
               </div>
 
               {/* Hairline Divider */}
-              <div className="border-t border-[rgba(27,31,42,0.08)]" />
+              <div className="border-t border-[#DCEEF2]" />
 
               {/* Section 3: Next Step Box */}
-              <div className="p-3.5 rounded-[16px] bg-[#fff8d6] border border-[#fde293] space-y-1">
-                <div className="text-[11px] font-headline font-bold text-[#8a5a00] uppercase tracking-wider">
-                  Next step
+              <div className="p-3.5 rounded-xl bg-[#E8F7FC] border border-[#9CE0F5] space-y-1">
+                <div className="text-[10.5px] font-mono font-bold text-[#075985] uppercase tracking-wider">
+                  Next Step
                 </div>
-                <p className="text-xs text-[#1b1f2a] font-medium leading-snug">
+                <p className="text-xs text-[#040B1A] font-medium leading-snug">
                   {nextStepText}
                 </p>
               </div>
@@ -305,15 +317,15 @@ export function RolePage({
       {/* Toast Feedback for Fund Wallets */}
       {fundToast && (
         <div
-          className={`fixed bottom-6 right-6 z-50 p-4 rounded-2xl border shadow-[0_12px_32px_rgba(27,31,42,0.12)] text-xs font-medium flex items-center space-x-2 bg-white ${
+          className={`fixed bottom-6 right-6 z-50 p-4 rounded-xl border shadow-[0_12px_32px_rgba(4,11,26,0.12)] text-xs font-medium flex items-center space-x-2 bg-[#FFFFFF] ${
             fundToast.type === "ok"
-              ? "border-[#17803d]/30 text-[#17803d]"
-              : "border-[#b42318]/30 text-[#b42318]"
+              ? "border-[#99F0E4] text-[#065F6B]"
+              : "border-[#FCA5A5] text-[#991B1B]"
           }`}
         >
           <span
             className={`w-2 h-2 rounded-full shrink-0 ${
-              fundToast.type === "ok" ? "bg-[#17803d]" : "bg-[#b42318]"
+              fundToast.type === "ok" ? "bg-[#14D9C4]" : "bg-[#991B1B]"
             }`}
           />
           <span>{fundToast.message}</span>
@@ -344,19 +356,19 @@ export function StepCard({
   result,
 }: StepCardProps) {
   return (
-    <section id={id} className="soft-card p-6 sm:p-8 space-y-6 bg-white">
-      {/* Header: grid columns [40px 1fr], column-gap 16px, badge vertically centered with FIRST line of title */}
-      <div className="grid grid-cols-[40px_1fr] gap-x-4 items-start pb-4 border-b border-[rgba(27,31,42,0.08)]">
-        <div className="flex items-center justify-center -mt-[6px]">
-          <span className="w-10 h-10 min-w-10 min-h-10 rounded-full bg-[#f9c933] text-[#1b1f2a] font-headline font-extrabold text-sm sm:text-base grid place-items-center shrink-0 shadow-xs">
+    <section id={id} className="soft-card p-6 sm:p-8 space-y-6 bg-[#FFFFFF] border border-[#DCEEF2]">
+      {/* Header: Badge aligned with title */}
+      <div className="grid grid-cols-[40px_1fr] gap-x-4 items-start pb-4 border-b border-[#DCEEF2]">
+        <div className="flex items-center justify-center -mt-1">
+          <span className="w-10 h-10 min-w-10 min-h-10 rounded-xl bg-[#040B1A] text-white font-headline font-extrabold text-sm sm:text-base grid place-items-center shrink-0 shadow-sm">
             <span className="leading-none">{stepNumber}</span>
           </span>
         </div>
         <div className="space-y-1">
-          <h2 className="font-headline text-xl sm:text-2xl font-bold text-[#1b1f2a] leading-[1.2]">
+          <h2 className="font-headline text-xl sm:text-2xl font-bold text-[#040B1A] leading-snug">
             {title}
           </h2>
-          <p className="text-xs sm:text-sm text-[#6b7280] font-body leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#64748B] font-body leading-relaxed">
             {description}
           </p>
         </div>
@@ -402,18 +414,18 @@ export function InlineResultArea({
   }
 
   return (
-    <div className="space-y-3 pt-3 border-t border-[rgba(27,31,42,0.08)]">
+    <div className="space-y-3 pt-3 border-t border-[#DCEEF2]">
       {/* Multi-step progress list */}
       {steps.length > 0 && (
         <div className="space-y-1">
           {steps.map((step, idx) => {
             let stepStatus: "done" | "active" | "waiting" = "waiting";
-            let pillClass = "bg-gray-100 text-[#6b7280]";
+            let pillClass = "status-pill-neutral";
             let pillText = "Waiting";
 
             if (step.status === "running") {
               stepStatus = "active";
-              pillClass = "status-pill-warn";
+              pillClass = "status-pill-info";
               pillText = "Active";
             } else if (step.status === "done") {
               stepStatus = "done";
@@ -447,12 +459,12 @@ export function InlineResultArea({
 
       {/* Error Message: soft red rounded block */}
       {errorMessage && (
-        <div className="rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] p-4 text-xs space-y-2">
-          <div className="flex items-center gap-1.5 font-headline font-bold text-[#b42318] uppercase tracking-wider">
-            <span className="w-2 h-2 rounded-full bg-[#b42318]" />
+        <div className="rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] p-4 text-xs space-y-2">
+          <div className="flex items-center gap-1.5 font-headline font-bold text-[#991B1B] uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-[#991B1B]" />
             Action Failed
           </div>
-          <div className="text-[#1b1f2a] font-medium">{errorMessage}</div>
+          <div className="text-[#040B1A] font-medium">{errorMessage}</div>
           {rawError && rawError !== errorMessage && (
             <TechnicalDetails
               title="Technical details"
@@ -462,14 +474,14 @@ export function InlineResultArea({
         </div>
       )}
 
-      {/* Success Message: soft green rounded block */}
+      {/* Success Message: mint-aqua rounded block */}
       {successMessage && (
-        <div className="rounded-[16px] bg-[#e3f6e9] border border-[#c6edd1] p-4 text-xs space-y-2">
-          <div className="flex items-center gap-1.5 font-headline font-bold text-[#17803d] uppercase tracking-wider">
-            <span className="w-2 h-2 rounded-full bg-[#17803d]" />
+        <div className="rounded-xl bg-[#E6FBF8] border border-[#99F0E4] p-4 text-xs space-y-2">
+          <div className="flex items-center gap-1.5 font-headline font-bold text-[#065F6B] uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-[#065F6B]" />
             Success
           </div>
-          <div className="text-[#1b1f2a] font-medium">{successMessage}</div>
+          <div className="text-[#040B1A] font-medium">{successMessage}</div>
 
           {txSignature && (
             <TechnicalDetails
@@ -519,23 +531,23 @@ export function TechnicalDetails({
 
   return (
     <details className="text-xs group pt-1">
-      <summary className="cursor-pointer font-headline font-semibold text-[#6b7280] hover:text-[#1b1f2a] select-none inline-flex items-center gap-1">
-        <span>▸</span>
+      <summary className="cursor-pointer font-headline font-semibold text-[#64748B] hover:text-[#040B1A] select-none inline-flex items-center gap-1.5">
+        <span className="group-open:rotate-90 transition-transform">▸</span>
         <span>{title}</span>
       </summary>
-      <div className="mt-2 p-3 rounded-[14px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] space-y-2 font-mono text-[11px]">
+      <div className="mt-2 p-3.5 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] space-y-2 font-mono text-[11px]">
         {items.map((item, idx) => (
-          <div key={idx} className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(27,31,42,0.04)] last:border-0 pb-1.5 last:pb-0">
-            <span className="text-[#6b7280] font-sans font-medium">{item.label}:</span>
+          <div key={idx} className="flex flex-wrap items-center justify-between gap-2 border-b border-[#DCEEF2]/50 last:border-0 pb-1.5 last:pb-0">
+            <span className="text-[#64748B] font-sans font-medium">{item.label}:</span>
             <div className="flex items-center gap-2">
-              <span className="text-[#1b1f2a] font-bold break-all">
+              <span className="text-[#040B1A] font-bold break-all">
                 {item.isAddress ? formatShortAddress(item.value, 8) : item.value}
               </span>
               <button
                 type="button"
                 data-ui="btn"
                 onClick={() => copyVal(item.label, item.value)}
-                className="text-[10px] font-sans font-semibold uppercase text-[#8a5a00] hover:underline px-1 py-0.5"
+                className="text-[10px] font-sans font-semibold uppercase text-[#075985] hover:underline px-1.5 py-0.5 rounded bg-white border border-[#DCEEF2]"
               >
                 {copiedKey === item.label ? "Copied" : "Copy"}
               </button>
@@ -544,9 +556,10 @@ export function TechnicalDetails({
                   href={item.explorerUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[10px] font-sans font-semibold text-[#1b1f2a] underline hover:text-[#8a5a00]"
+                  className="text-[10px] font-sans font-semibold text-[#075985] hover:text-[#040B1A] underline inline-flex items-center gap-1"
                 >
-                  View on Explorer ↗
+                  <span>Explorer</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
                 </a>
               )}
             </div>
@@ -578,8 +591,8 @@ export function DestructiveConfirm({
   onCancel,
 }: DestructiveConfirmProps) {
   return (
-    <div className="p-3.5 rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] space-y-2.5 text-xs">
-      <div className="font-headline font-bold text-[#b42318]">
+    <div className="p-3.5 rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] space-y-2.5 text-xs">
+      <div className="font-headline font-bold text-[#991B1B]">
         {promptText}
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -588,7 +601,7 @@ export function DestructiveConfirm({
           size="sm"
           onClick={onConfirm}
           loading={loading}
-          loadingText="Removing..."
+          loadingText="Processing..."
         >
           {confirmLabel}
         </GlassButton>
@@ -618,8 +631,8 @@ export function EmptyStateBox({
   onAction?: () => void;
 }) {
   return (
-    <div className="rounded-[20px] border border-dashed border-[rgba(27,31,42,0.18)] p-6 sm:p-8 text-center space-y-3 bg-[#fffdf6]">
-      <p className="text-xs sm:text-sm text-[#6b7280] font-body max-w-md mx-auto">
+    <div className="rounded-xl border border-dashed border-[#DCEEF2] p-8 text-center space-y-3 bg-[#F7FBFC]">
+      <p className="text-xs sm:text-sm text-[#64748B] font-body max-w-md mx-auto">
         {message}
       </p>
       {actionLabel && onAction && (

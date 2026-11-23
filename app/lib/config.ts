@@ -10,7 +10,7 @@ import solhealthIdl from "./idl/solhealth.json" with { type: "json" };
 
 export type ClusterType = "local" | "devnet";
 
-const rawCluster = process.env.NEXT_PUBLIC_CLUSTER || "local";
+const rawCluster = process.env.NEXT_PUBLIC_CLUSTER || "devnet";
 if (rawCluster !== "local" && rawCluster !== "devnet") {
   throw new Error(`Invalid NEXT_PUBLIC_CLUSTER: "${rawCluster}". Must be "local" or "devnet".`);
 }
@@ -33,7 +33,9 @@ if (process.env.NEXT_PUBLIC_SOLANA_RPC_URL) {
 
 export const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL?.trim() || DEFAULT_RPC_URL[CLUSTER];
 
-export const PROGRAM_ID = new PublicKey(solhealthIdl.address);
+export const PROGRAM_ID = new PublicKey(
+  process.env.NEXT_PUBLIC_PROGRAM_ID?.trim() || solhealthIdl.address
+);
 
 export const ENABLE_DEMO =
   process.env.NEXT_PUBLIC_ENABLE_DEMO === "true" ||

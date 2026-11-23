@@ -34,13 +34,11 @@ export function GuideLauncher() {
       <button
         type="button"
         onClick={handleToggle}
-        aria-label="Open SolHealth Guide"
+        aria-label="Open SolHealth Orbit Assistant"
         aria-expanded={isOpen}
         className="guide-launcher"
       >
-        <span className="text-base select-none" aria-hidden="true">💡</span>
-        <span>Guide</span>
-        <span className="guide-badge-dot" aria-hidden="true" />
+        <span>Orbit</span>
       </button>
 
       {isOpen && PanelComp && (

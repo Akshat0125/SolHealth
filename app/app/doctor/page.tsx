@@ -388,14 +388,14 @@ export default function DoctorPage() {
     >
       {/* Wallet Gating Card if Disconnected */}
       {mounted && !connected && (
-        <div className="p-6 rounded-[24px] bg-[#fffdf6] border border-[#f9c933]/40 shadow-xs space-y-4">
+        <div className="p-6 rounded-2xl bg-[#F7FBFC] border border-[#DCEEF2] shadow-xs space-y-4">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8a5a00]" />
-            <h3 className="font-headline font-bold text-base text-[#1b1f2a]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#00B8D9]" />
+            <h3 className="font-headline font-bold text-base text-[#040B1A]">
               Wallet Connection Required
             </h3>
           </div>
-          <p className="text-sm text-[#6b7280] leading-relaxed">
+          <p className="text-sm text-[#64748B] leading-relaxed">
             Doctor operations require signing access verification transactions. Please connect your Solana wallet.
           </p>
           <GlassButton variant="primary" onClick={openWalletModal}>
@@ -406,21 +406,21 @@ export default function DoctorPage() {
 
       {/* Role Gating Card if Wallet Not Verified */}
       {mounted && connected && !isDoctor && (
-        <div className="p-6 rounded-[24px] bg-[#fff8d6] border border-[#fde293] shadow-xs space-y-4">
+        <div className="p-6 rounded-2xl bg-[#FFF8E6] border border-[#FDE293] shadow-xs space-y-4">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8a5a00]" />
-            <h3 className="font-headline font-bold text-base text-[#8a5a00]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#92400E]" />
+            <h3 className="font-headline font-bold text-base text-[#92400E]">
               Wallet Verification Required
             </h3>
           </div>
-          <p className="text-sm text-[#1b1f2a] leading-relaxed">
+          <p className="text-sm text-[#040B1A] leading-relaxed">
             This wallet is not verified yet. Send this address to the Publisher. Only doctors with active on-chain credentials issued by the medical authority can open patient records.
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="font-mono text-xs bg-white px-3 py-1.5 rounded-[14px] border border-[rgba(27,31,42,0.1)] text-[#1b1f2a] hidden sm:inline">
+            <span className="font-mono text-xs bg-white px-3 py-1.5 rounded-xl border border-[#DCEEF2] text-[#040B1A] hidden sm:inline">
               {publicKey?.toBase58()}
             </span>
-            <span className="font-mono text-xs bg-white px-3 py-1.5 rounded-[14px] border border-[rgba(27,31,42,0.1)] text-[#1b1f2a] sm:hidden">
+            <span className="font-mono text-xs bg-white px-3 py-1.5 rounded-xl border border-[#DCEEF2] text-[#040B1A] sm:hidden">
               {publicKey ? formatShortAddress(publicKey.toBase58(), 8) : "----"}
             </span>
             <GlassButton variant="secondary" size="sm" onClick={copyDoctorAddress}>
@@ -432,13 +432,13 @@ export default function DoctorPage() {
 
       {/* Encryption Activation Prompt */}
       {mounted && connected && isDoctor && encryptionStatus !== "ready" && (
-        <div className="p-5 rounded-[22px] bg-[#fff9e6] border border-[#fde293] space-y-3">
+        <div className="p-5 rounded-2xl bg-[#E8F7FC] border border-[#9CE0F5] space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-4 sm:gap-6">
             <div>
-              <div className="font-headline font-bold text-sm text-[#8a5a00]">
+              <div className="font-headline font-bold text-sm text-[#075985]">
                 Encryption Session Inactive
               </div>
-              <div className="text-xs text-[#6b7280]">
+              <div className="text-xs text-[#64748B]">
                 Sign a message in your wallet to activate your in-memory decryption key.
               </div>
             </div>
@@ -466,7 +466,7 @@ export default function DoctorPage() {
       >
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="text-xs font-headline font-semibold text-[#6b7280]">
+            <div className="text-xs font-headline font-semibold text-[#64748B]">
               Credential Status
             </div>
             <div className="flex items-center gap-2">
@@ -501,7 +501,7 @@ export default function DoctorPage() {
         description="View records you have been granted permission to access, verify access on-chain, and decrypt."
       >
         {loadError && (
-          <div className="p-3.5 mb-3 rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] text-xs text-[#b42318] flex items-center justify-between gap-3">
+          <div className="p-3.5 mb-3 rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] text-xs text-[#991B1B] flex items-center justify-between gap-3">
             <span>{loadError}</span>
             <GlassButton variant="secondary" size="sm" onClick={loadData}>
               Retry
@@ -510,7 +510,7 @@ export default function DoctorPage() {
         )}
 
         {refreshing ? (
-          <div className="py-8 text-center text-xs font-mono text-[#6b7280]">
+          <div className="py-8 text-center text-xs font-mono text-[#64748B]">
             Checking shared records...
           </div>
         ) : sharedRecords.length === 0 ? (
@@ -548,21 +548,21 @@ export default function DoctorPage() {
               return (
                 <div
                   key={item.accessPda}
-                  className="p-5 rounded-[22px] bg-[#fffdf6] border border-[rgba(27,31,42,0.08)] space-y-4"
+                  className="p-5 rounded-2xl bg-[#FFFFFF] border border-[#DCEEF2] space-y-4 shadow-xs"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[rgba(27,31,42,0.06)]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#DCEEF2]">
                     <div className="flex items-center gap-2.5">
-                      <span className="font-headline font-bold text-sm text-[#1b1f2a]">
+                      <span className="font-headline font-bold text-sm text-[#040B1A]">
                         Record #{item.recordId.slice(-6)}
                       </span>
-                      <span className="text-xs font-mono text-[#6b7280]">
+                      <span className="text-xs font-mono text-[#64748B]">
                         from {formatShortAddress(item.patientPubkey, 6)}
                       </span>
                     </div>
 
                     <div>
                       {countdown.isRevoked ? (
-                        <span className="status-pill status-pill-danger">Revoked</span>
+                        <span className="status-pill status-pill-neutral">Revoked</span>
                       ) : countdown.isExpired ? (
                         <span className="status-pill status-pill-warn">Expired</span>
                       ) : (
@@ -572,13 +572,13 @@ export default function DoctorPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="text-xs font-mono text-[#6b7280]">
+                    <div className="text-xs font-mono text-[#64748B]">
                       IPFS CID: {formatShortAddress(item.cid, 6)}
                     </div>
 
                     {isBlocked ? (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-[#b42318] font-medium">
+                        <span className="text-xs text-[#991B1B] font-medium">
                           {blockedReason}
                         </span>
                         <GlassButton variant="secondary" size="sm" disabled>
@@ -601,12 +601,12 @@ export default function DoctorPage() {
 
                   {/* Inline Error Block */}
                   {thisError && (
-                    <div className="rounded-[16px] bg-[#fde8e6] border border-[#fbd0cb] p-4 text-xs space-y-1">
-                      <div className="flex items-center gap-1.5 font-headline font-bold text-[#b42318] uppercase tracking-wider">
-                        <span className="w-2 h-2 rounded-full bg-[#b42318]" />
+                    <div className="rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] p-4 text-xs space-y-1">
+                      <div className="flex items-center gap-1.5 font-headline font-bold text-[#991B1B] uppercase tracking-wider">
+                        <span className="w-2 h-2 rounded-full bg-[#991B1B]" />
                         Access Notice
                       </div>
-                      <p className="text-[#1b1f2a] font-medium leading-relaxed">
+                      <p className="text-[#040B1A] font-medium leading-relaxed">
                         {thisError}
                       </p>
                     </div>
@@ -644,8 +644,8 @@ export default function DoctorPage() {
           title={`Decrypted Record #${decryptedView.recordId.slice(-6)}`}
           description="View the decrypted health document or download it to your device."
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[rgba(27,31,42,0.06)]">
-            <span className="text-xs font-mono text-[#6b7280]">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#DCEEF2]">
+            <span className="text-xs font-mono text-[#64748B]">
               Format: {decryptedView.contentType.toUpperCase()} ({decryptedView.rawBytes.length} bytes)
             </span>
 
@@ -684,20 +684,20 @@ export default function DoctorPage() {
 
           <div className="pt-3">
             {decryptedView.contentType === "text" && decryptedView.textContent ? (
-              <pre className="p-4 rounded-[16px] bg-white border border-[rgba(27,31,42,0.08)] font-mono text-xs text-[#1b1f2a] overflow-x-auto whitespace-pre-wrap leading-relaxed">
+              <pre className="p-4 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] font-mono text-xs text-[#040B1A] overflow-x-auto whitespace-pre-wrap leading-relaxed">
                 {decryptedView.textContent}
               </pre>
             ) : decryptedView.contentType === "image" && decryptedView.blobUrl ? (
-              <div className="p-4 rounded-[16px] bg-white border border-[rgba(27,31,42,0.08)] flex justify-center">
+              <div className="p-4 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] flex justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={decryptedView.blobUrl}
                   alt={`Medical Record #${decryptedView.recordId}`}
-                  className="max-h-[500px] object-contain rounded-[8px]"
+                  className="max-h-[500px] object-contain rounded-lg"
                 />
               </div>
             ) : (
-              <div className="p-4 rounded-[16px] bg-white border border-[rgba(27,31,42,0.08)] text-xs text-[#6b7280]">
+              <div className="p-4 rounded-xl bg-[#F7FBFC] border border-[#DCEEF2] text-xs text-[#64748B]">
                 Binary document format ({decryptedView.rawBytes.length} bytes). Use Download to save and open with external viewer.
               </div>
             )}

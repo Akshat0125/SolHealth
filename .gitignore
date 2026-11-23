@@ -31,3 +31,4 @@ scripts/.authority.json
 Thumbs.db
 .surfpool
 ui-audit/
+.baseline/

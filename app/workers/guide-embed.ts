@@ -42,7 +42,7 @@ async function loadTransformers() {
     tf = await import("@huggingface/transformers");
   } catch (err) {
     // Plan B: CDN dynamic import
-    // @ts-ignore
+    // @ts-expect-error CDN dynamic import
     tf = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.3.3");
   }
 
