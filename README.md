@@ -1,6 +1,7 @@
 # SolHealth
 
 > 🌐 **Live Application**: [https://sol-health-two.vercel.app/](https://sol-health-two.vercel.app/)
+> **Demo Video**: [https://youtu.be/Mk9WtRbeY1I?si=_sIAZgdpB3LRQbex](https://youtu.be/Mk9WtRbeY1I?si=_sIAZgdpB3LRQbex)
 
 SolHealth is a patient-sovereign confidential medical vault prototype built on Solana Devnet with client-side encryption and IPFS storage. Designed for high-profile individuals, executives, public officials, and defence or service personnel, it keeps medical records encrypted locally in the browser using AES-256-GCM and wraps encryption keys with TweetNaCl Box for authorized recipients. Encrypted ciphertexts are pinned to IPFS while document hashes, IPFS content identifiers (CIDs), and time-bounded access delegations are enforced on-chain via Solana Program Derived Addresses (PDAs)—never medical content. Every state transition—from credential issuance to access grant and revocation—emits immutable on-chain events for verification and auditing.
 
