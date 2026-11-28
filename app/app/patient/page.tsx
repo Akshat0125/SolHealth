@@ -38,6 +38,7 @@ import {
 import { GlassButton } from "@/components/GlassButton";
 import { StepItem } from "@/components/StepStatus";
 import { formatUtcDateTime, formatShortAddress } from "@/lib/format";
+import { Lock } from "lucide-react";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -920,12 +921,12 @@ export default function PatientPage() {
   ];
 
   const nextStepText = isRetryPending
-    ? "Upload failed at the registration step: retry registration without re-uploading"
+    ? "Registration failed: retry on-chain registration without re-uploading"
     : !isAddDone
-    ? "Upload and encrypt your first medical record in step 1."
+    ? "Encrypt and register your first record in step 1."
     : !isShareDone
-    ? "Share your medical record with a verified doctor in step 2."
-    : "Review who has access to your records below.";
+    ? "Grant need-to-know access to a verified clinician in step 2."
+    : "Review active disclosures and audit permissions below.";
 
   // Safe SSR/Hydration render
   if (!mounted) {
@@ -934,11 +935,11 @@ export default function PatientPage() {
         role="patient"
         roleTitle="Patient"
         breadcrumbLabel="Patient"
-        titleQuestion="Who can see your records?"
-        whatYouCanDo="Encrypt medical records client-side, grant time-bound access to doctors, and revoke permissions at any time."
+        titleQuestion="Who holds access to your records?"
+        whatYouCanDo="Encrypt records locally in your browser, grant need-to-know, time-bound access to credentialed clinicians, and revoke permissions at any time."
         checklist={checklist}
         nextStepText={nextStepText}
-        roleDescription="Owner of medical records. Encrypts files in the browser and grants time-bound access."
+        roleDescription="Vault owner. Encrypts files locally and governs need-to-know, time-bound access."
       >
         <div className="text-center py-12 text-[#6b7280]">Loading...</div>
       </RolePage>
@@ -952,21 +953,21 @@ export default function PatientPage() {
         role="patient"
         roleTitle="Patient"
         breadcrumbLabel="Patient"
-        titleQuestion="Who can see your records?"
-        whatYouCanDo="Encrypt medical records client-side, grant time-bound access to doctors, and revoke permissions at any time."
+        titleQuestion="Who holds access to your records?"
+        whatYouCanDo="Encrypt records locally in your browser, grant need-to-know, time-bound access to credentialed clinicians, and revoke permissions at any time."
         checklist={checklist}
         nextStepText={nextStepText}
-        roleDescription="Owner of medical records. Encrypts files in the browser and grants time-bound access."
+        roleDescription="Vault owner. Encrypts files locally and governs need-to-know, time-bound access."
       >
         <div className="p-8 rounded-2xl text-center space-y-4 max-w-lg mx-auto bg-[#F7FBFC] border border-[#DCEEF2] shadow-xs">
-          <div className="w-12 h-12 rounded-xl bg-[#E8F7FC] border border-[#9CE0F5] text-[#075985] flex items-center justify-center mx-auto text-xl font-bold">
-            🔒
+          <div className="w-12 h-12 rounded-xl bg-[#E8F7FC] border border-[#9CE0F5] text-[#075985] flex items-center justify-center mx-auto">
+            <Lock className="w-5 h-5" />
           </div>
           <h2 className="text-xl font-headline font-bold text-[#040B1A]">
-            Connect your wallet to manage records
+            Connect your wallet to open your vault
           </h2>
           <p className="text-sm text-[#64748B] leading-relaxed">
-            Patients encrypt their medical records directly in their browser using an encryption key derived from their wallet signature, upload them to decentralized storage, and grant time-bound access to verified doctors without revealing their private keys.
+            Records are encrypted in browser memory using keys derived from your wallet signature, pinned as opaque ciphertext to IPFS, and governed by need-to-know grants on Solana. Only hashes and access rules are written on-chain—never medical content.
           </p>
           <div className="pt-2">
             <GlassButton variant="primary" onClick={openWalletModal}>
@@ -983,11 +984,11 @@ export default function PatientPage() {
       role="patient"
       roleTitle="Patient"
       breadcrumbLabel="Patient"
-      titleQuestion="Who can see your records?"
-      whatYouCanDo="Encrypt medical records client-side, grant time-bound access to doctors, and revoke permissions at any time."
+      titleQuestion="Who holds access to your records?"
+      whatYouCanDo="Encrypt records locally in your browser, grant need-to-know, time-bound access to credentialed clinicians, and revoke permissions at any time."
       checklist={checklist}
       nextStepText={nextStepText}
-      roleDescription="Owner of medical records. Encrypts files in the browser and grants time-bound access."
+      roleDescription="Vault owner. Encrypts files locally and governs need-to-know, time-bound access."
     >
       {/* ======================================================== */}
       {/* ENCRYPTION SESSION BANNER IF NOT READY                   */}
@@ -1033,7 +1034,7 @@ export default function PatientPage() {
         id="card-add"
         stepNumber="01"
         title="Add a record"
-        description="Choose a medical file (up to 4 MB) to encrypt with AES-256-GCM in your browser and register on Solana."
+        description="Select a file (up to 4 MB) to encrypt locally with AES-256-GCM, pin ciphertext to IPFS, and register its hash on Solana."
         result={
           <InlineResultArea
             errorMessage={uploadError}
@@ -1109,7 +1110,7 @@ export default function PatientPage() {
         id="card-records"
         stepNumber="02"
         title="Your records"
-        description="Manage your encrypted records, grant access to doctors, verify file integrity, and revoke permissions."
+        description="Manage encrypted records, grant need-to-know access to credentialed clinicians, verify integrity, and revoke permissions."
       >
         <div className="flex items-center justify-between pb-2">
           <span className="text-xs font-headline font-semibold text-[#64748B]">

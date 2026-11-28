@@ -366,25 +366,25 @@ export default function DoctorPage() {
   ];
 
   const nextStepText = !connected
-    ? "Connect your doctor wallet to inspect shared records."
+    ? "Connect your clinician wallet to inspect authorized disclosures."
     : !isDoctor
-    ? "This wallet is not verified yet. Send this address to the Publisher."
+    ? "This wallet is not verified yet. Share this address with the Publisher."
     : encryptionStatus !== "ready"
     ? "Activate your encryption session to decrypt records."
     : sharedRecords.length === 0
-    ? "Waiting for a patient to grant access to your wallet."
-    : "Open and decrypt a shared health record.";
+    ? "No active disclosures assigned to this wallet."
+    : "Verify permission on-chain and decrypt an authorized record.";
 
   return (
     <RolePage
       role="doctor"
       roleTitle="Doctor"
       breadcrumbLabel="Doctor"
-      titleQuestion="Which patient gave me permission to look?"
-      whatYouCanDo="View medical records shared with you, verify cryptographic integrity, and decrypt medical documents."
+      titleQuestion="Which records are cleared for your review?"
+      whatYouCanDo="Inspect need-to-know records shared with your wallet, verify on-chain authorization, and decrypt documents locally."
       checklist={checklist}
       nextStepText={nextStepText}
-      roleDescription="Credentialed clinician with time-bounded, auditable record access."
+      roleDescription="Credentialed clinician with time-bound, auditable read access."
     >
       {/* Wallet Gating Card if Disconnected */}
       {mounted && !connected && (
@@ -462,7 +462,7 @@ export default function DoctorPage() {
         id="card-credential"
         stepNumber="01"
         title="Medical Credential Status"
-        description="Verify that your doctor Solana address is authorized by the medical authority."
+        description="Confirm that your Solana address holds an active clinical credential issued by the Publisher authority."
       >
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
@@ -498,7 +498,7 @@ export default function DoctorPage() {
         id="card-records"
         stepNumber="02"
         title="Records Shared With You"
-        description="View records you have been granted permission to access, verify access on-chain, and decrypt."
+        description="Inspect time-bound disclosures granted to your wallet, log on-chain read access, and decrypt locally."
       >
         {loadError && (
           <div className="p-3.5 mb-3 rounded-xl bg-[#FEE2E2] border border-[#FCA5A5] text-xs text-[#991B1B] flex items-center justify-between gap-3">

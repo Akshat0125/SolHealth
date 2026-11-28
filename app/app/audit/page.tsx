@@ -121,11 +121,11 @@ export default function AuditPage() {
       role="audit"
       roleTitle="Auditor"
       breadcrumbLabel="Audit"
-      titleQuestion="What happened, and when?"
-      whatYouCanDo="Inspect cryptographic and on-chain event logs to independently verify all protocol activity."
+      titleQuestion="What was accessed, and when?"
+      whatYouCanDo="Inspect the immutable on-chain audit trail of credential issuances, record registrations, access grants, and clinical reads."
       checklist={checklist}
       nextStepText="Filter events by category, export CSV logs, or inspect individual transactions on Solana Explorer."
-      roleDescription="Public verifier checking cryptographic and on-chain proofs of record access."
+      roleDescription="Independent verifier reviewing immutable on-chain hashes, rules, and access events."
     >
       {/* ======================================================== */}
       {/* CARD 01: FILTER & TIMELINE CONTROLS                      */}
@@ -186,7 +186,7 @@ export default function AuditPage() {
         id="card-timeline"
         stepNumber="02"
         title="Activity timeline"
-        description="Plain-language chronological event trail decoded from Solana on-chain transaction logs."
+        description="Chronological audit trail decoded from Solana on-chain transaction logs. Contains hashes, rules, and addresses—never medical content."
       >
         {/* Summary row above list */}
         <div className="flex flex-wrap items-center gap-4 text-xs font-headline font-semibold text-[#64748B] pb-2 border-b border-[#DCEEF2]">

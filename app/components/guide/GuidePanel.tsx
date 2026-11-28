@@ -134,7 +134,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
         {
           id: "welcome",
           sender: "bot",
-          text: "Hello! I am SolHealth Orbit, your on-chain health records assistant. How can I assist you with using the platform today?",
+          text: "I'm Orbit. I can guide you through the vault, local encryption, and on-chain access controls.",
           suggestions: getSuggestions(guideContext.activeRole === "home" ? "all" : (guideContext.activeRole as GuideRole), pathname || undefined),
         },
       ]);
@@ -203,7 +203,7 @@ export function GuidePanel({ isOpen, onClose }: GuidePanelProps) {
       {
         id: `welcome_${Date.now()}`,
         sender: "bot",
-        text: "Conversation cleared. What can SolHealth Orbit help you with?",
+        text: "Conversation cleared. How can Orbit assist you with the vault?",
         suggestions: getSuggestions(guideContext.activeRole === "home" ? "all" : (guideContext.activeRole as GuideRole), pathname || undefined),
       },
     ]);

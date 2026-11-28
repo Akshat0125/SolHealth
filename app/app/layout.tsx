@@ -30,18 +30,18 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sol-health-two.vercel.app"),
-  title: "SolHealth — Sovereign, Patient-Controlled Medical Records",
+  title: "SolHealth: Confidential Medical Vault on Solana",
   description:
-    "A health record system where the patient decides who reads what, and the blockchain remembers who did. Client-side encrypted on Solana & IPFS.",
+    "A patient-sovereign medical vault designed for executives, public officials and service members. Client-side AES-256-GCM encryption, IPFS ciphertext storage, and an immutable audit trail on Solana.",
   icons: {
     icon: "/icon.png",
     shortcut: "/favicon.ico",
     apple: "/apple-icon.png",
   },
   openGraph: {
-    title: "SolHealth — Sovereign, Patient-Controlled Medical Records",
+    title: "SolHealth: Confidential Medical Vault on Solana",
     description:
-      "A health record system where the patient decides who reads what, and the blockchain remembers who did. Client-side encrypted on Solana & IPFS.",
+      "A patient-sovereign medical vault designed for executives, public officials and service members. Encrypted locally, pinned on IPFS, and governed by on-chain hashes and access rules.",
     url: "https://sol-health-two.vercel.app",
     siteName: "SolHealth",
     images: [
@@ -57,9 +57,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "SolHealth — Sovereign, Patient-Controlled Medical Records",
+    title: "SolHealth: Confidential Medical Vault on Solana",
     description:
-      "A health record system where the patient decides who reads what, and the blockchain remembers who did.",
+      "A patient-sovereign medical vault designed for executives, public officials and service members. Encrypted in your browser, governed on Solana.",
     images: ["/logo.png"],
   },
   other: {
@@ -113,7 +113,7 @@ export default function RootLayout({
                     SolHealth
                   </span>
                   <span className="text-[11px] text-[#64748B]">
-                    Patient-sovereign health data
+                    Confidential medical vault
                   </span>
                 </div>
               </div>
@@ -125,13 +125,12 @@ export default function RootLayout({
                 <Link href="/patient" className="hover:text-[#00B8D9] transition-colors">Patient</Link>
                 <Link href="/doctor" className="hover:text-[#00B8D9] transition-colors">Doctor</Link>
                 <Link href="/audit" className="hover:text-[#00B8D9] transition-colors">Audit</Link>
-                <Link href="/#about" className="hover:text-[#00B8D9] transition-colors">About</Link>
                 <Link href="/#contact" className="hover:text-[#00B8D9] transition-colors">Contact</Link>
               </div>
 
               {/* Network notice */}
               <div className="font-mono text-[11px] text-[#64748B] text-center md:text-right">
-                Running on Solana {CLUSTER === "devnet" ? "Devnet" : "Localnet"}. Test network, no real money.
+                Solana {CLUSTER === "devnet" ? "Devnet" : "Localnet"} · Hashes &amp; access rules only
               </div>
             </div>
 
@@ -139,10 +138,10 @@ export default function RootLayout({
             <div className="max-w-[1200px] mx-auto mt-6 pt-4 border-t border-[#DCEEF2] flex flex-col sm:flex-row items-center justify-between gap-2 text-[11.5px] font-mono text-[#64748B]">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#14D9C4] animate-pulse" />
-                <span><strong>Prototype running on Solana Devnet.</strong> Do not upload real medical records.</span>
+                <span>Prototype running on Solana Devnet. Test network, no real money. Do not upload real medical data.</span>
               </div>
               <div className="text-[10.5px] text-[#94A3B8]">
-                For testing and demonstration purposes only.
+                Not certified for regulated or classified data.
               </div>
             </div>
           </footer>

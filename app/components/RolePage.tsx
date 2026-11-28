@@ -121,7 +121,7 @@ export function RolePage({
             <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[#E8F7FC] border border-[#9CE0F5] text-xs text-[#075985] font-headline">
               <span className="w-2 h-2 rounded-full bg-[#14D9C4] animate-pulse shrink-0" />
               <span>
-                <strong>Prototype running on Solana Devnet.</strong> Do not upload real medical records.
+                <strong>Prototype running on Solana Devnet.</strong> Test network, no real money. Do not upload real medical data.
               </span>
             </div>
           )}

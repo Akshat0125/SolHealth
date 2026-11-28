@@ -66,16 +66,14 @@ export function Navbar() {
     const handleHash = () => {
       const hash = window.location.hash;
       if (hash === "#contact") setActiveSection("contact");
-      else if (hash === "#about") setActiveSection("about");
       else if (!hash && window.scrollY < 200) setActiveSection("home");
     };
 
     handleHash();
 
-    const aboutEl = document.getElementById("about");
     const contactEl = document.getElementById("contact");
 
-    if (!aboutEl && !contactEl) return;
+    if (!contactEl) return;
 
     const observer = new IntersectionObserver(
       () => {
@@ -89,12 +87,6 @@ export function Navbar() {
           setActiveSection("contact");
           return;
         }
-
-        const aboutRect = aboutEl?.getBoundingClientRect();
-        if (aboutRect && aboutRect.top <= window.innerHeight * 0.65 && aboutRect.bottom >= 60) {
-          setActiveSection("about");
-          return;
-        }
       },
       {
         rootMargin: "-80px 0px -40% 0px",
@@ -102,8 +94,7 @@ export function Navbar() {
       }
     );
 
-    if (aboutEl) observer.observe(aboutEl);
-    if (contactEl) observer.observe(contactEl);
+    observer.observe(contactEl);
     window.addEventListener("hashchange", handleHash);
 
     return () => {
@@ -182,7 +173,6 @@ export function Navbar() {
     { href: "/patient", label: "Patient" },
     { href: "/doctor", label: "Doctor" },
     { href: "/audit", label: "Audit" },
-    { href: "/#about", label: "About" },
     { href: "/#contact", label: "Contact" },
   ];
 
@@ -191,7 +181,6 @@ export function Navbar() {
       const isAnchor = href.startsWith("/#");
       if (pathname === "/") {
         if (isAnchor) {
-          if (href === "/#about" && activeSection === "about") return true;
           if (href === "/#contact" && activeSection === "contact") return true;
           return false;
         }
@@ -207,8 +196,7 @@ export function Navbar() {
   );
 
   const handleNavLinkClick = (href: string) => {
-    if (href === "/#about") setActiveSection("about");
-    else if (href === "/#contact") setActiveSection("contact");
+    if (href === "/#contact") setActiveSection("contact");
     else if (href === "/") setActiveSection("home");
     setMobileMenuOpen(false);
   };

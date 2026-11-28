@@ -45,7 +45,7 @@ Configure the following variables in **Project Settings > Environment Variables*
 
 Solana's public Devnet endpoint (`https://api.devnet.solana.com`) enforces strict IP-based rate limiting (HTTP 429) and may drop requests during network congestion.
 
-For production or reliable demo environments, we strongly recommend obtaining a free Devnet RPC endpoint from one of the following providers:
+For production or reliable demo environments, it is strongly recommended to obtain a free Devnet RPC endpoint from one of the following providers:
 - **Helius**: Free tier offers high-speed RPC and enhanced WebSocket support.
 - **QuickNode**: Free Solana Devnet endpoints with generous daily request allowances.
 - **Alchemy**: Free tier with Solana Devnet support and request caching.

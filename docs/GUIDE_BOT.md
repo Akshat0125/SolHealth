@@ -87,4 +87,4 @@ The non-emergency precautions and emergency triage guidelines follow public guid
 - Ministry of Health and Family Welfare, Government of India
 - International Federation of Red Cross and Red Crescent Societies (Red Cross first aid)
 
-Exact references to be added by the authors
+Exact references to be added.

@@ -299,11 +299,11 @@ export default function PublisherPage() {
       role="issuer"
       roleTitle={ROLE_LABELS.issuer}
       breadcrumbLabel={ROLE_LABELS.issuer}
-      titleQuestion="Who is allowed to treat patients?"
-      whatYouCanDo="Initialize the SolHealth registry, verify doctor credentials on-chain, and revoke credentials."
+      titleQuestion="Who is credentialed to view records?"
+      whatYouCanDo="Initialize the SolHealth authority registry, issue on-chain credentials to vetted clinicians, and revoke credentials when required."
       checklist={checklist}
       nextStepText={nextStepText}
-      roleDescription="Medical authority verifying doctor licenses and issuing on-chain credentials."
+      roleDescription="Registry authority responsible for vetting clinicians and managing on-chain credentials."
     >
       {/* Wallet Gating Card if Disconnected */}
       {mounted && !connected && (

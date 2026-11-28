@@ -18,9 +18,9 @@ export const FAQ_ENTRIES: FaqEntry[] = [
     id: "what_is_solhealth",
     roles: ["all"],
     question: "What is SolHealth?",
-    keywords: ["solhealth", "about", "overview", "what is this", "protocol", "platform"],
+    keywords: ["solhealth", "about", "overview", "what is this", "protocol", "platform", "vault"],
     answer:
-      "SolHealth is a decentralized medical records protocol on Solana. Patients encrypt medical records in their browser with AES-256-GCM, upload them to IPFS, and grant time-bound access to verified doctors. A Publisher manages doctor credentials on-chain.",
+      "SolHealth is a confidential medical vault prototype on Solana Devnet. Records are encrypted locally with AES-256-GCM and pinned to IPFS, while Solana stores only hashes and time-bound, need-to-know access rules.",
     nextAction: { label: "Go to Home", route: "/" },
   },
 
@@ -325,7 +325,27 @@ export const FAQ_ENTRIES: FaqEntry[] = [
     nextAction: { label: "Doctor portal", route: "/doctor" },
   },
 
-  // 30. General fallback entry
+  // 30. Approved for classified or regulated data?
+  {
+    id: "classified_regulated_approval",
+    roles: ["all"],
+    question: "Is this approved for classified or regulated data?",
+    keywords: ["classified", "regulated", "compliance", "hipaa", "fips", "iso", "certified", "production"],
+    answer:
+      "No. SolHealth is a prototype on a Solana test network. Do not upload real medical data. A production deployment would need a private or permissioned ledger, a formal security review, and compliance certification.",
+  },
+
+  // 31. What does the blockchain reveal?
+  {
+    id: "what_blockchain_reveals",
+    roles: ["all"],
+    question: "What does the blockchain reveal?",
+    keywords: ["reveal", "public", "metadata", "on-chain", "hashes", "timestamps", "ledger"],
+    answer:
+      "Only hashes, access rules, timestamps, and pseudonymous wallet addresses, never medical content. Access events on a public network are visible, which is why a sensitive deployment would use a private ledger.",
+  },
+
+  // 32. General fallback entry
   {
     id: "generic_fallback",
     roles: ["all"],
